@@ -1,4 +1,4 @@
-package apiProtobuf
+package apiprotobuf
 
 type LoggerConfig struct {
 	JSON   bool   `yaml:"json"`

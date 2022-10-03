@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/livelists/livelist-server/pkg/config"
+	"github.com/livelists/livelist-server/pkg/websocket"
 	"io/ioutil"
 )
 
@@ -31,6 +32,7 @@ func getConfig() (*config.Config, error) {
 
 func main() {
 	conf, err := getConfig()
+	websocket.StartWS(conf.Port)
 
 	if err == nil {
 		fmt.Println(conf)
