@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/livelists/livelist-server/pkg/config"
+	"github.com/livelists/livelist-server/pkg/services"
 	"github.com/livelists/livelist-server/pkg/websocket"
 	"io/ioutil"
 )
@@ -32,8 +33,12 @@ func getConfig() (*config.Config, error) {
 
 func main() {
 	conf, err := getConfig()
-	websocket.StartWS(conf.Port)
 
+	mongoClient, _ := config.ConnectToMongo(conf.Mongo)
+
+	services.CreateChannel(mongoClient)
+
+	websocket.StartWS(conf.Port)
 	if err == nil {
 		fmt.Println(conf)
 	}
