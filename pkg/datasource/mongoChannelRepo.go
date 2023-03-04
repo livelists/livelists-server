@@ -2,7 +2,6 @@ package datasource
 
 import (
 	"context"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
@@ -18,11 +17,6 @@ type Channel struct {
 }
 
 func CreateChannel(client *mongo.Client) {
-	fmt.Println("create channel")
-	databases, _ := client.ListDatabaseNames(ctx, ctx)
-
-	fmt.Println(databases)
-
 	client.Database("local").Collection("Channel").InsertOne(ctx, Channel{
 		Identification: "nikita",
 		CreatedAt:      time.Now(),

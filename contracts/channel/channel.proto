@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package livelists;
+
+import "google/protobuf/timestamp.proto";
+
+enum ChannelStatus {
+  Active = 0;
+  Archived = 1;
+}
+
+message Channel {
+  string name = 1;
+  google.protobuf.Timestamp createdAt = 2;
+  int64 maxParticipants = 3;
+  ChannelStatus status = 4;
+}
+
+message CreateChannel {
+  string name = 1;
+  int64 maxParticipants = 3;
+}
