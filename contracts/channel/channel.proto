@@ -1,15 +1,26 @@
 syntax = "proto3";
-package example.com.my.package.helloworld;
-option go_package = "example.com/my/package/helloworld";
+package livelists;
+option go_package = "contracts/channel";
 
-service HelloWorld {
-  rpc Hello(HelloReq) returns (HelloResp);
+import "google/protobuf/timestamp.proto";
+
+enum ChannelStatus {
+  Active = 0;
+  Archived = 1;
 }
 
-message HelloReq {
-  string subject = 1;
+service ChannelService {
+  rpc CreateChannel(CreateChannelReq) returns (Channel);
 }
 
-message HelloResp {
-  string text = 1;
+message Channel {
+  string name = 1;
+  google.protobuf.Timestamp createdAt = 2;
+  int64 maxParticipants = 3;
+  ChannelStatus status = 4;
+}
+
+message CreateChannelReq {
+  string name = 1;
+  int64 maxParticipants = 3;
 }
