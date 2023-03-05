@@ -7,9 +7,11 @@ import (
 )
 
 type Config struct {
-	Port  uint        `yaml:"port"`
-	Redis RedisConfig `yaml:"redis,omitempty"`
-	Mongo MongoConfig `yaml:"mongo,omitempty"`
+	Port      uint        `yaml:"port"`
+	ApiKey    string      `yaml:"api_key"`
+	SecretKey string      `yaml:"secret_key"`
+	Redis     RedisConfig `yaml:"redis,omitempty"`
+	Mongo     MongoConfig `yaml:"mongo,omitempty"`
 }
 
 type RedisConfig struct {

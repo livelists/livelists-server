@@ -1,4 +1,4 @@
-package loggerpackage
+package logger
 
 import (
 	"github.com/go-logr/logr"

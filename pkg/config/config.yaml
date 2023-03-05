@@ -1,4 +1,6 @@
 port: 7771
+api_key: 'fgewtghhryh'
+secret_key: 'ergtgtr3h'
 redis:
   address: 'localhost:6739'
 mongo:
