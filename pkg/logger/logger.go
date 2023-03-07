@@ -1,13 +1,14 @@
 package logger
 
 import (
+	"fmt"
 	"github.com/go-logr/logr"
 	"go.uber.org/zap/zapcore"
 )
 
 var (
 	defaultLogger = logr.Discard()
-	pkgLogger     = Logger(logr.Discard())
+	pkgLogger     = Logger(logr.Discard().V(10))
 )
 
 // GetLogger returns the logger that was set with SetLogger with an extra depth of 1
@@ -32,6 +33,7 @@ func Debugw(msg string, keysAndValues ...interface{}) {
 }
 
 func Infow(msg string, keysAndValues ...interface{}) {
+	fmt.Println(pkgLogger)
 	pkgLogger.Infow(msg, keysAndValues...)
 }
 
