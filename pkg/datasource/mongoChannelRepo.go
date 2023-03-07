@@ -6,10 +6,11 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	pb "github.com/livelists/livelist-server/contracts/channel"
 	"github.com/livelists/livelist-server/pkg/config"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
 
-var ctx, _ = context.WithTimeout(context.Background(), 10*time.Second)
+var ctx = context.TODO()
 
 type CreateChannelArgs struct {
 	Identification  string
@@ -19,6 +20,7 @@ type CreateChannelArgs struct {
 func CreateChannel(args CreateChannelArgs) pb.Channel {
 	var client = config.GetMongoClient()
 	_, err := client.Database(MainDatabase).Collection(ChannelCollection).InsertOne(ctx, Channel{
+		ID:              primitive.NewObjectID(),
 		Identification:  args.Identification,
 		Status:          pb.ChannelStatus_Active.String(),
 		MaxParticipants: args.MaxParticipants,
