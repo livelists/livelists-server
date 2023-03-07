@@ -37,7 +37,7 @@ func StartWS(port uint) {
 	if err != nil {
 		log.Fatalf("listen %q error: %v", addr, err)
 	}
-	log.Printf("listening %s (%q)", ln.Addr(), addr)
+	log.Printf("WS listening %s", ln.Addr())
 
 	var (
 		s     = new(http.Server)

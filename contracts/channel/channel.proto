@@ -14,13 +14,13 @@ service ChannelService {
 }
 
 message Channel {
-  string name = 1;
+  string identification = 1;
   google.protobuf.Timestamp createdAt = 2;
   int64 maxParticipants = 3;
   ChannelStatus status = 4;
 }
 
 message CreateChannelReq {
-  string name = 1;
+  string identification = 1;
   int64 maxParticipants = 3;
 }

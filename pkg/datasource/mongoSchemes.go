@@ -20,8 +20,10 @@ type AuthInfo struct {
 const ChannelCollection = "Channel"
 
 type Channel struct {
-	ID             primitive.ObjectID `bson:"_id"`
-	Identification string             `bson:"identification"`
-	CreatedAt      time.Time          `bson:"createdAt"`
-	UpdatedAt      time.Time          `bson:"updatedAt"`
+	ID              primitive.ObjectID `bson:"_id"`
+	Identification  string             `bson:"identification"`
+	MaxParticipants int64              `bson:"maxParticipants"`
+	Status          string             `bson:"status"`
+	CreatedAt       time.Time          `bson:"createdAt"`
+	UpdatedAt       time.Time          `bson:"updatedAt"`
 }

@@ -1,10 +1,10 @@
 package main
 
 import (
+	"github.com/livelists/livelist-server/cmd/client"
 	"github.com/livelists/livelist-server/pkg/config"
 	"github.com/livelists/livelist-server/pkg/config/boot"
 	"github.com/livelists/livelist-server/pkg/logger"
-	"github.com/livelists/livelist-server/pkg/services"
 	"github.com/livelists/livelist-server/pkg/websocket"
 	"io/ioutil"
 )
@@ -26,7 +26,7 @@ func StartServer(conf *config.Config) {
 	}
 	boot.SeedMongo(mongoClient, conf)
 
-	services.CreateChannel(mongoClient)
+	go client.StartTwirpRPC()
 
 	websocket.StartWS(conf.Port)
 }
