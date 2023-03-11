@@ -1,8 +1,9 @@
 package datasource
 
 import (
+	"github.com/livelists/livelist-server/pkg/config"
+	"github.com/livelists/livelist-server/pkg/datasource/mongoSchemes"
 	"go.mongodb.org/mongo-driver/mongo"
-	"time"
 )
 
 type AddAuthInfoArgs struct {
@@ -11,10 +12,10 @@ type AddAuthInfoArgs struct {
 }
 
 func AddAuthInfo(client *mongo.Client, info AddAuthInfoArgs) {
-	client.Database(MainDatabase).Collection(AuthInfoCollection).InsertOne(ctx, AuthInfo{
-		SecretKey: info.SecretKey,
-		ApiKey:    info.ApiKey,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	})
+	client.Database(config.MainDatabase).Collection(mongoSchemes.AuthInfoCollection).InsertOne(
+		ctx,
+		mongoSchemes.NewAuthInfo(mongoSchemes.NewAuthInfoArgs{
+			ApiKey:    info.ApiKey,
+			SecretKey: info.SecretKey,
+		}))
 }

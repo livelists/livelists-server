@@ -7,6 +7,8 @@ import (
 	"log"
 )
 
+const MainDatabase = "livelists"
+
 var ctx = context.TODO()
 
 type MongoStore struct {

@@ -1,5 +1,5 @@
 syntax = "proto3";
-package livelists;
+package channel;
 option go_package = "contracts/channel";
 
 import "google/protobuf/timestamp.proto";
@@ -14,13 +14,13 @@ service ChannelService {
 }
 
 message Channel {
-  string identification = 1;
+  string identifier = 1;
   google.protobuf.Timestamp createdAt = 2;
   int64 maxParticipants = 3;
   ChannelStatus status = 4;
 }
 
 message CreateChannelReq {
-  string identification = 1;
+  string identifier = 1;
   int64 maxParticipants = 3;
 }

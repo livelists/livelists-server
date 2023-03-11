@@ -2,7 +2,8 @@ package client
 
 import (
 	"fmt"
-	pb "github.com/livelists/livelist-server/contracts/channel"
+	channel_pb "github.com/livelists/livelist-server/contracts/channel"
+	participant_pb "github.com/livelists/livelist-server/contracts/participant"
 	"github.com/livelists/livelist-server/pkg/services"
 	"log"
 	"net/http"
@@ -13,9 +14,13 @@ const serverAddr = ":8080"
 func StartTwirpRPC() {
 	fmt.Println("fg")
 	channelSVC := services.ChannelService{}
-	channelHandler := pb.NewChannelServiceServer(&channelSVC)
+	channelHandler := channel_pb.NewChannelServiceServer(&channelSVC)
+	participantSVC := services.ParticipantService{}
+	participantHandler := participant_pb.NewParticipantServiceServer(&participantSVC)
+
 	mux := http.NewServeMux()
 	mux.Handle(channelHandler.PathPrefix(), channelHandler)
+	mux.Handle(participantHandler.PathPrefix(), participantHandler)
 
 	log.Printf("RPC listening %s", serverAddr)
 
