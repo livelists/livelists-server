@@ -19,25 +19,29 @@ type Participant struct {
 }
 
 type Grants struct {
-	SendMessage  *bool `bson:"sendMessage"`
-	ReadMessages *bool `bson:"readMessages"`
-	Admin        *bool `bson:"admin"`
+	SendMessage  bool `bson:"sendMessage"`
+	ReadMessages bool `bson:"readMessages"`
+	Admin        bool `bson:"admin"`
 }
 
 type NewParticipantArgs struct {
 	Identifier string
-	Channel    primitive.ObjectID
-	Grants     Grants
+	ChannelId  primitive.ObjectID
+	Grants     pb.ChannelParticipantGrants
 }
 
 func NewParticipant(args NewParticipantArgs) Participant {
 	return Participant{
 		ID:         primitive.NewObjectID(),
 		Identifier: args.Identifier,
-		Channel:    args.Channel,
-		Grants:     args.Grants,
-		Status:     pb.ParticipantStatus_Active.String(),
-		UpdatedAt:  time.Now(),
-		CreatedAt:  time.Now(),
+		Channel:    args.ChannelId,
+		Grants: Grants{
+			Admin:        FalseIfNil(args.Grants.Admin),
+			SendMessage:  FalseIfNil(args.Grants.SendMessage),
+			ReadMessages: FalseIfNil(args.Grants.ReadMessages),
+		},
+		Status:    pb.ParticipantStatus_Active.String(),
+		UpdatedAt: time.Now(),
+		CreatedAt: time.Now(),
 	}
 }

@@ -16,11 +16,14 @@ type CreateChannelArgs struct {
 
 func CreateChannel(args CreateChannelArgs) pb.Channel {
 	var client = config.GetMongoClient()
-	_, err := client.Database(config.MainDatabase).Collection(mongoSchemes.ChannelCollection).InsertOne(ctx, mongoSchemes.NewChannelArgs{
+
+	newChannel := mongoSchemes.NewChannel(mongoSchemes.NewChannelArgs{
 		Identifier:      args.Identifier,
 		Status:          pb.ChannelStatus_Active,
 		MaxParticipants: args.MaxParticipants,
 	})
+
+	_, err := client.Database(config.MainDatabase).Collection(mongoSchemes.ChannelCollection).InsertOne(ctx, newChannel)
 
 	fmt.Print(err)
 

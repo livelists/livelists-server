@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	channel_pb "github.com/livelists/livelist-server/contracts/channel"
 	participant_pb "github.com/livelists/livelist-server/contracts/participant"
 	"github.com/livelists/livelist-server/pkg/services"
@@ -12,7 +11,6 @@ import (
 const serverAddr = ":8080"
 
 func StartTwirpRPC() {
-	fmt.Println("fg")
 	channelSVC := services.ChannelService{}
 	channelHandler := channel_pb.NewChannelServiceServer(&channelSVC)
 	participantSVC := services.ParticipantService{}
