@@ -1,0 +1,39 @@
+syntax = "proto3";
+package participant;
+option go_package = "contracts/participant";
+
+import "google/protobuf/timestamp.proto";
+
+enum ParticipantStatus {
+  Active = 0;
+  Banned = 1;
+}
+
+service ParticipantService {
+  rpc AddParticipantToChannel(AddParticipantToChannelReq) returns (ParticipantCreateRes);
+}
+
+message ParticipantCreateRes {
+  Participant participant = 1;
+  string accessToken = 2;
+  ChannelParticipantGrants grants = 3;
+}
+
+message ChannelParticipantGrants {
+  optional bool sendMessage = 1;
+  optional bool readMessages = 2;
+  optional bool admin = 3;
+}
+
+message Participant {
+  string identifier = 1;
+  google.protobuf.Timestamp createdAt = 2;
+  ParticipantStatus status = 3;
+  string channelId = 4;
+}
+
+message AddParticipantToChannelReq {
+  string identifier = 1;
+  string channelId = 2;
+  ChannelParticipantGrants grants = 5;
+}
