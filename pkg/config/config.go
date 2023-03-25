@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+type ConfStore struct {
+	Conf *Config
+}
+
+var confStore ConfStore
+
 type Config struct {
 	Port      uint        `yaml:"port"`
 	ApiKey    string      `yaml:"api_key"`
@@ -25,22 +31,27 @@ type MongoConfig struct {
 	URI string `yaml:"uri"`
 }
 
-var ConfigData = Config{
-	Mongo: MongoConfig{},
-}
-
 func NewConfig(configStr string) (*Config, error) {
-	ConfigData := &Config{
+	configData := &Config{
 		Port:  7771,
 		Redis: RedisConfig{},
 	}
 
 	if configStr != "" {
 		decoder := yaml.NewDecoder(strings.NewReader(configStr))
-		if err := decoder.Decode(ConfigData); err != nil {
+		if err := decoder.Decode(configData); err != nil {
 			return nil, fmt.Errorf("could not parse config: %v", err)
 		}
 	}
 
-	return ConfigData, nil
+	confStore.Conf = configData
+
+	return configData, nil
+}
+
+func GetConfig() Config {
+	if confStore.Conf == nil {
+		confStore.Conf = &Config{}
+	}
+	return *confStore.Conf
 }
