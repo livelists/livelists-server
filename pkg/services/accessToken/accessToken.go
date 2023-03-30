@@ -36,8 +36,34 @@ func (at *AccessToken) AddChannelId(channelId string) {
 	at.channelId = channelId
 }
 
-func (at *AccessToken) Parse(token string) string {
-	return token
+func (at *AccessToken) Parse(tokenStr string) (bool, error) {
+	configData := config.GetConfig()
+
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(configData.SecretKey), nil
+	})
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		sendMessage := claims["SendMessage"].(bool)
+		admin := claims["Admin"].(bool)
+		readMessages := claims["ReadMessages"].(bool)
+		at.AddGrants(GrantsData{
+			SendMessage:  &sendMessage,
+			Admin:        &admin,
+			ReadMessages: &readMessages,
+		})
+		at.AddChannelId(claims["ChannelId"].(string))
+		at.AddUser(claims["Identifier"].(string))
+		at.isValid = &token.Valid
+	} else {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (at *AccessToken) Sign() (string, error) {
@@ -45,8 +71,6 @@ func (at *AccessToken) Sign() (string, error) {
 
 	now := time.Now()
 	expirationDate := now.Add(tokenExpiration).Unix()
-
-	fmt.Println(configData.SecretKey)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"IsServiceRoot": shared.FalseIfNil(at.isServiceRoot),

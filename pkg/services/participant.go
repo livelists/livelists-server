@@ -70,15 +70,13 @@ func (p ParticipantService) GetParticipantAccessToken(ctx context.Context, req *
 
 	tokenStr, err := token.Sign()
 
-	fmt.Println(err, "token sign error")
+	if err != nil {
+		fmt.Println(err, "token sign error")
+	}
 
 	return &pb.GetParticipantAccessTokenRes{
 		Identifier:  req.Identifier,
 		ChannelId:   req.ChannelId,
 		AccessToken: tokenStr,
 	}, nil
-}
-
-func ConnectToChannel() {
-
 }
