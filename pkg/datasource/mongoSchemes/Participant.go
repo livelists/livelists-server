@@ -31,6 +31,7 @@ type NewParticipantArgs struct {
 }
 
 func NewParticipant(args NewParticipantArgs) Participant {
+	now := time.Now()
 	return Participant{
 		ID:         primitive.NewObjectID(),
 		Identifier: args.Identifier,
@@ -41,7 +42,7 @@ func NewParticipant(args NewParticipantArgs) Participant {
 			ReadMessages: FalseIfNil(args.Grants.ReadMessages),
 		},
 		Status:    pb.ParticipantStatus_Active.String(),
-		UpdatedAt: time.Now(),
-		CreatedAt: time.Now(),
+		UpdatedAt: now,
+		CreatedAt: now,
 	}
 }

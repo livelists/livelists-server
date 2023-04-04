@@ -1,13 +1,14 @@
 package shared
 
+import "github.com/livelists/livelist-server/contracts/wsMessages"
+
 type JoinToRoomArgs struct {
 	RoomName             string
 	WsConnectionIdentity string
 }
 type PublishMessageArgs struct {
 	RoomName string
-	Event    string
-	Data     map[string]any
+	Data     wsMessages.InBoundMessage
 }
 type WsRoom interface {
 	JoinToRoom(args JoinToRoomArgs)

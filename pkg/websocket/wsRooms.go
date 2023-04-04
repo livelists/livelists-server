@@ -1,8 +1,8 @@
 package websocket
 
 import (
-	"fmt"
 	"github.com/livelists/livelist-server/pkg/shared"
+	"google.golang.org/protobuf/proto"
 )
 
 func init() {
@@ -19,11 +19,23 @@ type WsRooms struct {
 
 var roomsStore WsRooms
 
+func checkIsIdentityNotAlreadyConnected(roomConnections []string, connection string) bool {
+	for _, c := range roomConnections {
+		if c == connection {
+			return false
+		}
+	}
+	return true
+}
+
 func (w WsRoom) JoinToRoom(args shared.JoinToRoomArgs) {
-	newConnections := append(roomsStore.Rooms[args.RoomName].Connections, args.WsConnectionIdentity)
-	roomCopy := WsRoom{}
-	roomCopy.Connections = newConnections
-	roomsStore.Rooms[args.RoomName] = roomCopy
+	existedConnections := roomsStore.Rooms[args.RoomName].Connections
+	if checkIsIdentityNotAlreadyConnected(existedConnections, args.WsConnectionIdentity) {
+		newConnections := append(existedConnections, args.WsConnectionIdentity)
+		roomCopy := WsRoom{}
+		roomCopy.Connections = newConnections
+		roomsStore.Rooms[args.RoomName] = roomCopy
+	}
 }
 
 func (w WsRoom) PublishMessage(args shared.PublishMessageArgs) bool {
@@ -36,14 +48,16 @@ func (w WsRoom) PublishMessage(args shared.PublishMessageArgs) bool {
 		return false
 	}
 
+	messageBytes, err := proto.Marshal(&args.Data)
+
+	if err != nil {
+		return false
+	}
 	for _, connectionId := range room.Connections {
 		publishToAllSIDsInIdentity(publishToAllSIDsInIdentityArgs{
 			Identity: connectionId,
-			Payload:  args.Data["text"].(string),
+			Payload:  messageBytes,
 		})
-		fmt.Println(room.Connections)
-		fmt.Println(&room.Connections)
-		fmt.Println("publish to connection", connectionId)
 	}
 
 	return true
