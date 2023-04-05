@@ -45,7 +45,7 @@ func (e *connectionNotFoundError) Error() string {
 
 type publishToAllSIDsInIdentityArgs struct {
 	Identity string
-	Payload  string
+	Payload  []byte
 }
 
 func publishToAllSIDsInIdentity(args publishToAllSIDsInIdentityArgs) error {

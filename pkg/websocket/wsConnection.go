@@ -1,13 +1,12 @@
 package websocket
 
 import (
+	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
 	accessTokenService "github.com/livelists/livelist-server/pkg/services/accessToken"
-	"io"
 	"net"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 type WsConnection struct {
@@ -47,19 +46,10 @@ func (c *WsConnection) addConnection(conn *net.Conn) {
 	c.Connection = conn
 }
 
-func (c *WsConnection) publishToSID(payload string) error {
+func (c *WsConnection) publishToSID(payload []byte) error {
 	conn := *c.Connection
 
-	newPaylod := make([]byte, len(payload))
-	r := strings.NewReader(payload)
-
-	_, err := io.ReadFull(r, newPaylod)
-
-	if err != nil {
-		return err
-	}
-
-	err = wsutil.WriteServerMessage(conn, 1, newPaylod)
+	err := wsutil.WriteServerMessage(conn, ws.OpBinary, payload)
 
 	if err != nil {
 		return err

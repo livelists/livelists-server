@@ -1,0 +1,35 @@
+syntax = "proto3";
+package wsMessages;
+option go_package = "contracts/wsMessages";
+
+import "google/protobuf/timestamp.proto";
+
+enum MessageType {
+  Participant = 0;
+  System = 1;
+}
+
+enum MessageSubType {
+  ParticipantJoined = 0;
+  ChatCreated = 1;
+  TextMessage = 2;
+}
+
+message ParticipantShortInfo {
+  string id = 1;
+}
+
+message Message {
+  string id = 1;
+  optional ParticipantShortInfo sender = 2;
+  string text = 3;
+  MessageType type = 4;
+  MessageSubType subType = 5;
+  optional CustomData customData = 6;
+  google.protobuf.Timestamp createdAt = 7;
+}
+
+
+message CustomData {
+  map<string, string> data = 6;
+}

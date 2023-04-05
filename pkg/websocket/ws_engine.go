@@ -183,7 +183,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Println(header.OpCode)
 		if header.OpCode == ws.OpClose {
 			code, reason := ws.ParseCloseFrameData(payload)
 			log.Printf("close frame received: %v %v", code, reason)
