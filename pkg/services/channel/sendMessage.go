@@ -39,7 +39,7 @@ func SendMessage(args SendMessageArgs) {
 		Type:       wsMessages.MessageType_Participant,
 		SubType:    wsMessages.MessageSubType_TextMessage,
 		CustomData: args.Payload.CustomData,
-		CreatedAt:  &timestamp.Timestamp{},
+		CreatedAt:  &timestamp.Timestamp{Seconds: createdMessage.CreatedAt.Unix()},
 	}
 
 	newM := wsMessages.InBoundMessage_NewMessage{
