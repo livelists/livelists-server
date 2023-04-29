@@ -34,12 +34,17 @@ func SendMessage(args SendMessageArgs) {
 		Id:   createdMessage.ID.Hex(),
 		Text: args.Payload.Text,
 		Sender: &wsMessages.ParticipantShortInfo{
-			Id: args.SenderIdentifier,
+			Identifier: args.SenderIdentifier,
+			CustomData: args.Payload.CustomData,
 		},
+		LocalId:    &args.Payload.LocalId,
 		Type:       wsMessages.MessageType_Participant,
 		SubType:    wsMessages.MessageSubType_TextMessage,
 		CustomData: args.Payload.CustomData,
-		CreatedAt:  &timestamp.Timestamp{Seconds: createdMessage.CreatedAt.Unix()},
+		CreatedAt: &timestamp.Timestamp{
+			Seconds: createdMessage.CreatedAt.Unix(),
+			Nanos:   int32(createdMessage.CreatedAt.UnixNano()),
+		},
 	}
 
 	newM := wsMessages.InBoundMessage_NewMessage{
@@ -47,7 +52,10 @@ func SendMessage(args SendMessageArgs) {
 	}
 
 	args.WS.PublishMessage(shared.PublishMessageArgs{
-		RoomName: args.ChannelId,
-		Data:     wsMessages.InBoundMessage{Message: &newM},
+		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{
+			Identifier: args.ChannelId,
+			Type:       shared.RoomName_channel,
+		}),
+		Data: wsMessages.InBoundMessage{Message: &newM},
 	})
 }

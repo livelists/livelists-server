@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/livelists/livelist-server/pkg/config"
-	"github.com/livelists/livelist-server/pkg/shared"
+	"github.com/livelists/livelist-server/pkg/shared/helpers"
 	"time"
 )
 
@@ -73,12 +73,12 @@ func (at *AccessToken) Sign() (string, error) {
 	expirationDate := now.Add(tokenExpiration).Unix()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"IsServiceRoot": shared.FalseIfNil(at.isServiceRoot),
+		"IsServiceRoot": helpers.FalseIfNil(at.isServiceRoot),
 		"Identifier":    at.identifier,
 		"ChannelId":     at.channelId,
-		"SendMessage":   shared.FalseIfNil(at.grants.SendMessage),
-		"ReadMessages":  shared.FalseIfNil(at.grants.ReadMessages),
-		"Admin":         shared.FalseIfNil(at.grants.Admin),
+		"SendMessage":   helpers.FalseIfNil(at.grants.SendMessage),
+		"ReadMessages":  helpers.FalseIfNil(at.grants.ReadMessages),
+		"Admin":         helpers.FalseIfNil(at.grants.Admin),
 		"exp":           expirationDate,
 	})
 
@@ -88,7 +88,7 @@ func (at *AccessToken) Sign() (string, error) {
 }
 
 func (at *AccessToken) IsServiceRoot() bool {
-	return shared.FalseIfNil(at.isServiceRoot)
+	return helpers.FalseIfNil(at.isServiceRoot)
 }
 
 func (at *AccessToken) Grants() GrantsData {
@@ -99,7 +99,7 @@ func (at *AccessToken) Identifier() string {
 	return at.identifier
 }
 func (at *AccessToken) IsValid() bool {
-	return shared.FalseIfNil(at.isValid)
+	return helpers.FalseIfNil(at.isValid)
 }
 func (at *AccessToken) ChannelId() string {
 	return at.channelId

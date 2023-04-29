@@ -27,9 +27,9 @@ func HandleEvent(conn *WsConnection, message []byte) error {
 	newWs := WsRoom{}
 	switch parsedMessage.Message.(type) {
 	case *wsMessages.OutBoundMessage_JoinChannel:
-		chatJoin := parsedMessage.GetJoinChannel()
+		channelJoin := parsedMessage.GetJoinChannel()
 		participant.JoinToChannel(participant.JoinToChannelArgs{
-			Payload:      *chatJoin,
+			Payload:      *channelJoin,
 			WsIdentifier: conn.AccessToken.Identifier(),
 			ChannelId:    conn.AccessToken.ChannelId(),
 			WS:           newWs,

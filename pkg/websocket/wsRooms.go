@@ -6,7 +6,7 @@ import (
 )
 
 func init() {
-	roomsStore.Rooms = make(map[string]WsRoom)
+	roomsStore.Rooms = make(map[shared.RoomName]WsRoom)
 }
 
 type WsRoom struct {
@@ -14,7 +14,7 @@ type WsRoom struct {
 }
 
 type WsRooms struct {
-	Rooms map[string]WsRoom
+	Rooms map[shared.RoomName]WsRoom
 }
 
 var roomsStore WsRooms
@@ -61,4 +61,14 @@ func (w WsRoom) PublishMessage(args shared.PublishMessageArgs) bool {
 	}
 
 	return true
+}
+
+func (w WsRoom) GetRoomName(args shared.GetRoomNameArgs) shared.RoomName {
+	switch args.Type {
+	case shared.RoomName_channel:
+		return shared.RoomName("channel_" + args.Identifier)
+	case shared.RoomName_participant:
+		return shared.RoomName("participant_" + args.Identifier)
+	}
+	return ""
 }

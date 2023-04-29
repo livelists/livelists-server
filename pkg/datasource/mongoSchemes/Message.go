@@ -57,3 +57,18 @@ func NewMessage(args NewMessageArgs) Message {
 		UpdatedAt:  now,
 	}
 }
+
+type MessageWithParticipant struct {
+	Id          string             `bson:"id"`
+	Text        string             `bson:"text"`
+	CustomData  *map[string]string `bson:"customData"`
+	Type        string             `bson:"type"`
+	SubType     string             `bson:"subType"`
+	CreatedAt   time.Time          `bson:"createdAt"`
+	Participant participant        `bson:"participant"`
+}
+
+type participant struct {
+	Identifier string             `bson:"identifier"`
+	CustomData *map[string]string `bson:"customData"`
+}
