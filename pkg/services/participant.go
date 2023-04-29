@@ -12,7 +12,6 @@ import (
 type ParticipantService struct{}
 
 func (p ParticipantService) AddParticipantToChannel(ctx context.Context, req *pb.AddParticipantToChannelReq) (*pb.AddParticipantToChannelRes, error) {
-
 	part, err := datasource.AddParticipant(datasource.AddParticipantArgs{
 		Identifier: req.Identifier,
 		Channel:    req.ChannelId,
@@ -21,6 +20,7 @@ func (p ParticipantService) AddParticipantToChannel(ctx context.Context, req *pb
 			Admin:        req.Grants.Admin,
 			ReadMessages: req.Grants.ReadMessages,
 		},
+		CustomData: req.CustomData,
 	})
 
 	token := accessToken.AccessToken{}

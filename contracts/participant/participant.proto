@@ -31,12 +31,14 @@ message Participant {
   google.protobuf.Timestamp createdAt = 2;
   ParticipantStatus status = 3;
   string channelId = 4;
+  optional CustomData customData = 5;
 }
 
 message AddParticipantToChannelReq {
   string identifier = 1;
   string channelId = 2;
-  ChannelParticipantGrants grants = 5;
+  ChannelParticipantGrants grants = 3;
+  optional CustomData customData = 4;
 }
 
 message GetParticipantAccessTokenReq {
@@ -48,4 +50,8 @@ message GetParticipantAccessTokenRes {
   string identifier = 1;
   string channelId = 2;
   string accessToken = 3;
+}
+
+message CustomData {
+  map<string, string> data = 6;
 }

@@ -15,6 +15,7 @@ type AddParticipantArgs struct {
 	Identifier string
 	Channel    string
 	Grants     pb.ChannelParticipantGrants
+	CustomData *pb.CustomData
 }
 
 func AddParticipant(args AddParticipantArgs) (mongoSchemes.Participant, error) {
@@ -36,6 +37,7 @@ func AddParticipant(args AddParticipantArgs) (mongoSchemes.Participant, error) {
 		Identifier: args.Identifier,
 		ChannelId:  channelDocument.ID,
 		Grants:     args.Grants,
+		CustomData: args.CustomData,
 	})
 
 	_, err = client.Database(config.MainDatabase).Collection(

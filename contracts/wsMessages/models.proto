@@ -16,7 +16,8 @@ enum MessageSubType {
 }
 
 message ParticipantShortInfo {
-  string id = 1;
+  string identifier = 1;
+  optional CustomData customData = 2;
 }
 
 message Message {
@@ -25,11 +26,11 @@ message Message {
   string text = 3;
   MessageType type = 4;
   MessageSubType subType = 5;
-  optional CustomData customData = 6;
-  google.protobuf.Timestamp createdAt = 7;
+  optional string localId = 6;
+  optional CustomData customData = 7;
+  google.protobuf.Timestamp createdAt = 8;
 }
 
-
 message CustomData {
-  map<string, string> data = 6;
+  map<string, string> data = 1;
 }

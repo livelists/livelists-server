@@ -1,7 +1,7 @@
 package websocket
 
 import (
-	"github.com/livelists/livelist-server/pkg/shared"
+	"github.com/livelists/livelist-server/pkg/shared/helpers"
 )
 
 func init() {
@@ -22,7 +22,7 @@ var cStore ConnectionsStore
 func AddWsConnection(conn *WsConnection) {
 	connectionId := conn.AccessToken.Identifier()
 	newWrapper := ConnectionWrapper{
-		Sid:        shared.RandStringRunes(8),
+		Sid:        helpers.RandStringRunes(8),
 		Connection: conn,
 	}
 
