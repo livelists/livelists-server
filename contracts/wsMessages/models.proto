@@ -4,8 +4,13 @@ option go_package = "contracts/wsMessages";
 
 import "google/protobuf/timestamp.proto";
 
+enum ParticipantStatus {
+  Active = 0;
+  Banned = 1;
+}
+
 enum MessageType {
-  Participant = 0;
+  ParticipantCreated = 0;
   System = 1;
 }
 
@@ -20,13 +25,19 @@ message ParticipantShortInfo {
   optional CustomData customData = 2;
 }
 
+message ChannelParticipantGrants {
+  optional bool sendMessage = 1;
+  optional bool readMessages = 2;
+  optional bool admin = 3;
+}
+
 message Message {
   string id = 1;
   optional ParticipantShortInfo sender = 2;
   string text = 3;
   MessageType type = 4;
   MessageSubType subType = 5;
-  optional string localId = 6;
+  string localId = 6;
   optional CustomData customData = 7;
   google.protobuf.Timestamp createdAt = 8;
 }

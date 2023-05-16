@@ -1,7 +1,6 @@
 package mongoSchemes
 
 import (
-	"fmt"
 	pb "github.com/livelists/livelist-server/contracts/participant"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
@@ -36,9 +35,7 @@ type NewParticipantArgs struct {
 func NewParticipant(args NewParticipantArgs) Participant {
 	now := time.Now()
 
-	fmt.Println("custom1", args.CustomData)
 	if args.CustomData != nil {
-		fmt.Println("custom Data", &args.CustomData.Data)
 		return Participant{
 			ID:         primitive.NewObjectID(),
 			Identifier: args.Identifier,

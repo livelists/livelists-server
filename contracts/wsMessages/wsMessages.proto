@@ -11,6 +11,7 @@ message OutBoundMessage {
     //send new message to channel
     SendMessage sendMessage = 1;
     JoinChannel joinChannel = 2;
+    LoadMoreMessages loadMoreMessages = 3;
   }
 }
 
@@ -19,6 +20,7 @@ message InBoundMessage {
     // sent when new message in chat received
     Message newMessage = 1;
     MeJoinedToChannel meJoinedToChannel = 2;
+    LoadMoreMessagesRes loadMoreMessagesRes = 3;
   }
 }
 
@@ -35,11 +37,38 @@ message JoinChannel {
 
 message ChannelInitialInfo {
   string channelId = 1;
-  repeated Message historyMessages = 2;
+  int64 totalMessages = 2;
+  repeated Message historyMessages = 3;
+}
+
+message MeJoined {
+  string identifier = 1;
+  ChannelParticipantGrants grants = 2;
+  optional CustomData customData = 3;
 }
 
 message MeJoinedToChannel {
-  string meIdentifier = 1;
+  MeJoined me = 1;
   bool isSuccess = 2;
   ChannelInitialInfo channel = 3;
+}
+
+message LoadMoreMessages {
+  int32 PageSize = 1;
+  optional google.protobuf.Timestamp FirstLoadedCreatedAt = 2;
+  int32 SkipFromFirstLoaded = 3;
+}
+
+
+message LoadMoreMessagesRequestInfo {
+  int32 PageSize = 1;
+  optional google.protobuf.Timestamp FirstLoadedCreatedAt = 2;
+  int32 SkipFromFirstLoaded = 3;
+}
+
+message LoadMoreMessagesRes {
+  LoadMoreMessagesRequestInfo requestInfo = 1;
+  bool isSuccess = 2;
+  int64 totalMessages = 3;
+  repeated Message messages = 4;
 }

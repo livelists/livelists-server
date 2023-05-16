@@ -28,7 +28,7 @@ func HandleEvent(conn *WsConnection, message []byte) error {
 	switch parsedMessage.Message.(type) {
 	case *wsMessages.OutBoundMessage_JoinChannel:
 		channelJoin := parsedMessage.GetJoinChannel()
-		participant.JoinToChannel(participant.JoinToChannelArgs{
+		participant.JoinToChannel(&participant.JoinToChannelArgs{
 			Payload:      *channelJoin,
 			WsIdentifier: conn.AccessToken.Identifier(),
 			ChannelId:    conn.AccessToken.ChannelId(),
@@ -36,12 +36,22 @@ func HandleEvent(conn *WsConnection, message []byte) error {
 		})
 	case *wsMessages.OutBoundMessage_SendMessage:
 		sendMessage := parsedMessage.GetSendMessage()
-		channel.SendMessage(channel.SendMessageArgs{
+		channel.SendMessage(&channel.SendMessageArgs{
 			Payload:          *sendMessage,
 			ChannelId:        conn.AccessToken.ChannelId(),
 			SenderIdentifier: conn.AccessToken.Identifier(),
 			WS:               newWs,
 		})
+	case *wsMessages.OutBoundMessage_LoadMoreMessages:
+		payload := parsedMessage.GetLoadMoreMessages()
+
+		channel.LoadMoreMessages(&channel.LoadMoreMessagesArgs{
+			Payload:             *payload,
+			ChannelId:           conn.AccessToken.ChannelId(),
+			RequesterIdentifier: conn.AccessToken.Identifier(),
+			WS:                  newWs,
+		})
+
 	}
 
 	return nil

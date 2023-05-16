@@ -15,11 +15,11 @@ type SendMessageArgs struct {
 	WS               shared.WsRoom
 }
 
-func SendMessage(args SendMessageArgs) {
+func SendMessage(args *SendMessageArgs) {
 	createdMessage, err := datasource.AddMessage(datasource.AddMessageArgs{
 		Text:              args.Payload.Text,
 		CustomData:        args.Payload.CustomData,
-		Type:              wsMessages.MessageType_Participant.String(),
+		Type:              wsMessages.MessageType_ParticipantCreated.String(),
 		SubType:           wsMessages.MessageSubType_TextMessage.String(),
 		SenderIdentifier:  args.SenderIdentifier,
 		ChannelIdentifier: args.ChannelId,
@@ -37,8 +37,8 @@ func SendMessage(args SendMessageArgs) {
 			Identifier: args.SenderIdentifier,
 			CustomData: args.Payload.CustomData,
 		},
-		LocalId:    &args.Payload.LocalId,
-		Type:       wsMessages.MessageType_Participant,
+		LocalId:    args.Payload.LocalId,
+		Type:       wsMessages.MessageType_ParticipantCreated,
 		SubType:    wsMessages.MessageSubType_TextMessage,
 		CustomData: args.Payload.CustomData,
 		CreatedAt: &timestamp.Timestamp{
