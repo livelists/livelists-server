@@ -80,29 +80,29 @@ type GetMessagesFromChannelArgs struct {
 	StartFromDate     time.Time
 }
 
-func GetMessagesFromChannel(args GetMessagesFromChannelArgs) ([]mongoSchemes.MessageWithParticipant, error) {
+func GetMessagesFromChannel(args GetMessagesFromChannelArgs) ([]mongoSchemes.MessageWithParticipant, int64, error) {
 	var client = config.GetMongoClient()
 
 	var channelDocument, err = FindChannelByIdentifier(args.ChannelIdentifier)
 
 	if err != nil {
-		return []mongoSchemes.MessageWithParticipant{}, err
+		return []mongoSchemes.MessageWithParticipant{}, 0, err
 	}
 
-	fmt.Println(channelDocument.ID)
-	messages, _ := client.Database(
+	messages, err := client.Database(
 		config.MainDatabase).Collection(mongoSchemes.MessageCollection).Aggregate(ctx, bson.A{
 		bson.D{
 			{"$match",
 				bson.D{
 					{"channel", channelDocument.ID},
-					{"createdAt", bson.D{{"$gte", args.StartFromDate}}},
+					{"createdAt", bson.D{{"$lt", args.StartFromDate}}},
 				},
 			},
 		},
-		bson.D{{"$sort", bson.D{{"createdAt", 1}}}},
+		bson.D{{"$sort", bson.D{{"createdAt", -1}}}},
 		bson.D{{"$skip", args.Skip}},
 		bson.D{{"$limit", args.Limit}},
+		bson.D{{"$sort", bson.D{{"createdAt", 1}}}},
 		bson.D{
 			{"$lookup",
 				bson.D{
@@ -152,8 +152,32 @@ func GetMessagesFromChannel(args GetMessagesFromChannelArgs) ([]mongoSchemes.Mes
 	err = messages.All(ctx, &messagesDocuments)
 
 	if err != nil {
-		return []mongoSchemes.MessageWithParticipant{}, err
+		return []mongoSchemes.MessageWithParticipant{}, 0, err
 	}
 
-	return messagesDocuments, nil
+	var totalCount, errCount = CountMessagesInChannel(CountMessagesInChannelArgs{
+		ChannelId: channelDocument.ID.String(),
+	})
+
+	if errCount != nil {
+		return []mongoSchemes.MessageWithParticipant{}, 0, errCount
+	}
+
+	return messagesDocuments, totalCount, nil
+}
+
+type CountMessagesInChannelArgs struct {
+	ChannelId string
+}
+
+func CountMessagesInChannel(args CountMessagesInChannelArgs) (int64, error) {
+	var client = config.GetMongoClient()
+
+	messagesCount, err := client.Database(config.MainDatabase).Collection(mongoSchemes.MessageCollection).CountDocuments(ctx, bson.D{{"identifier", args.ChannelId}})
+
+	if err != nil {
+		return 0, err
+	}
+
+	return messagesCount, nil
 }

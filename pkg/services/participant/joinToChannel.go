@@ -1,8 +1,8 @@
 package participant
 
 import (
-	"fmt"
 	"github.com/livelists/livelist-server/contracts/wsMessages"
+	"github.com/livelists/livelist-server/pkg/datasource"
 	"github.com/livelists/livelist-server/pkg/services/message"
 	"github.com/livelists/livelist-server/pkg/shared"
 	"github.com/livelists/livelist-server/pkg/shared/helpers"
@@ -16,7 +16,12 @@ type JoinToChannelArgs struct {
 	WS           shared.WsRoom
 }
 
-func JoinToChannel(args JoinToChannelArgs) {
+func JoinToChannel(args *JoinToChannelArgs) {
+	var meParticipant, err = datasource.FindParticipantByIdentifierAndChannel(datasource.FindPByIdAndChannelArgs{
+		ChannelId:  args.ChannelId,
+		Identifier: args.WsIdentifier,
+	})
+
 	args.WS.JoinToRoom(shared.JoinToRoomArgs{
 		WsConnectionIdentity: args.WsIdentifier,
 		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{
@@ -32,39 +37,28 @@ func JoinToChannel(args JoinToChannelArgs) {
 		}),
 	})
 
-	messages, err := message.GetMessages(message.GetMessagesArgs{
+	messages, messagesCount, err := message.GetMessages(message.GetMessagesArgs{
 		PageSize:          int(args.Payload.InitialPageSize),
 		Offset:            int(args.Payload.InitialOffset),
 		ChannelIdentifier: args.ChannelId,
-		StartFromDate:     time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC),
+		StartFromDate:     time.Now(),
 	})
-
-	fmt.Println("messagesLength", len(messages))
-	messagesPb := make([]*wsMessages.Message, len(messages))
-
-	for i, m := range messages {
-		messagesPb[i] = &wsMessages.Message{
-			Id:         m.Id,
-			Text:       m.Text,
-			SubType:    wsMessages.MessageSubType(wsMessages.MessageSubType_value[m.SubType]),
-			Type:       wsMessages.MessageType(wsMessages.MessageSubType_value[m.Type]),
-			LocalId:    nil,
-			CustomData: helpers.CustomDataFormat(m.CustomData),
-			Sender: &wsMessages.ParticipantShortInfo{
-				Identifier: m.Participant.Identifier,
-				CustomData: helpers.CustomDataFormat(m.Participant.CustomData),
-			},
-			CreatedAt: helpers.DateToTimeStamp(m.CreatedAt),
-		}
-	}
 
 	meJoinedMessage := wsMessages.InBoundMessage_MeJoinedToChannel{
 		MeJoinedToChannel: &wsMessages.MeJoinedToChannel{
-			MeIdentifier: args.WsIdentifier,
-			IsSuccess:    true,
+			Me: &wsMessages.MeJoined{
+				Identifier: args.WsIdentifier,
+				Grants: &wsMessages.ChannelParticipantGrants{
+					Admin:        &meParticipant.Grants.Admin,
+					SendMessage:  &meParticipant.Grants.SendMessage,
+					ReadMessages: &meParticipant.Grants.ReadMessages,
+				},
+				CustomData: helpers.CustomDataFormat(meParticipant.CustomData),
+			},
+			IsSuccess: true,
 			Channel: &wsMessages.ChannelInitialInfo{
 				ChannelId:       args.ChannelId,
-				HistoryMessages: messagesPb,
+				HistoryMessages: messages,
 			},
 		},
 	}
@@ -72,11 +66,12 @@ func JoinToChannel(args JoinToChannelArgs) {
 	if err != nil {
 		meJoinedMessage = wsMessages.InBoundMessage_MeJoinedToChannel{
 			MeJoinedToChannel: &wsMessages.MeJoinedToChannel{
-				MeIdentifier: args.WsIdentifier,
-				IsSuccess:    false,
+				Me:        &wsMessages.MeJoined{},
+				IsSuccess: false,
 				Channel: &wsMessages.ChannelInitialInfo{
 					ChannelId:       args.ChannelId,
-					HistoryMessages: messagesPb,
+					TotalMessages:   messagesCount,
+					HistoryMessages: messages,
 				},
 			},
 		}
