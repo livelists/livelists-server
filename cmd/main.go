@@ -7,6 +7,7 @@ import (
 	"github.com/livelists/livelist-server/pkg/logger"
 	"github.com/livelists/livelist-server/pkg/websocket"
 	"io/ioutil"
+	"os"
 )
 
 func main() {
@@ -41,7 +42,8 @@ func getConfigString(configFile string) (string, error) {
 }
 
 func getConfig() (*config.Config, error) {
-	confString, err := getConfigString("/home/nikrainev/Desktop/livelists/livelists-server/pkg/config/config.yaml")
+	path, err := os.Getwd()
+	confString, err := getConfigString(path + "/pkg/config/config.yaml")
 	if err != nil {
 		return nil, err
 	}
