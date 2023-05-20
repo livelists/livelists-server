@@ -1,0 +1,7 @@
+port: 7771
+api_key: 'apiKey'
+secret_key: 'secretKey'
+redis:
+  address: 'localhost:6739'
+mongo:
+  uri: 'mongodb://localhost:57017/'
