@@ -1,8 +1,4 @@
-FROM golang:1.20-alpine as builder
-
-ARG TARGETPLATFORM
-ARG TARGETARCH
-RUN echo building for "$TARGETPLATFORM"
+FROM golang:1.19-alpine as builder
 
 WORKDIR /workspace
 
@@ -18,7 +14,7 @@ COPY cmd/ cmd/
 COPY pkg/ pkg/
 COPY contracts/ contracts/
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH GO111MODULE=on go build -a -o livelists-server ./cmd
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o livelists-server ./cmd
 
 FROM alpine
 

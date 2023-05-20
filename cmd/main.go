@@ -6,7 +6,6 @@ import (
 	"github.com/livelists/livelist-server/pkg/config/boot"
 	"github.com/livelists/livelist-server/pkg/logger"
 	"github.com/livelists/livelist-server/pkg/websocket"
-	"io/ioutil"
 	"os"
 )
 
@@ -33,12 +32,12 @@ func StartServer(conf *config.Config) {
 }
 
 func getConfigString(configFile string) (string, error) {
-	outConfigBody, err := ioutil.ReadFile(configFile)
+	/*outConfigBody, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		return "", err
-	}
+	}*/
 
-	return string(outConfigBody), nil
+	return "port: 7771\napi_key: 'apiKey'\nsecret_key: 'secretKey'\nredis:\n  address: 'localhost:6739'\nmongo:\n  uri: 'mongodb://localhost:57017/'", nil
 }
 
 func getConfig() (*config.Config, error) {
