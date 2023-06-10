@@ -25,7 +25,7 @@ func CreateChannel(args CreateChannelArgs) pb.Channel {
 
 	_, err := client.Database(config.MainDatabase).Collection(mongoSchemes.ChannelCollection).InsertOne(ctx, newChannel)
 
-	fmt.Print(err)
+	fmt.Print("channel create", err)
 
 	return pb.Channel{
 		Identifier:      args.Identifier,

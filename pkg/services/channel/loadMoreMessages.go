@@ -1,7 +1,6 @@
 package channel
 
 import (
-	"fmt"
 	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/services/message"
 	"github.com/livelists/livelist-server/pkg/shared"
@@ -21,8 +20,6 @@ func LoadMoreMessages(args *LoadMoreMessagesArgs) {
 	if args.Payload.FirstLoadedCreatedAt != nil {
 		startFromDate = args.Payload.FirstLoadedCreatedAt.AsTime()
 	}
-
-	fmt.Println(startFromDate)
 
 	messages, totalCount, err := message.GetMessages(message.GetMessagesArgs{
 		StartFromDate:     startFromDate,
@@ -62,7 +59,7 @@ func LoadMoreMessages(args *LoadMoreMessagesArgs) {
 	args.WS.PublishMessage(shared.PublishMessageArgs{
 		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{
 			Identifier: args.RequesterIdentifier,
-			Type:       shared.RoomName_participant,
+			Type:       wsMessages.WSRoomTypes_Participant,
 		}),
 		Data: wsMessages.InBoundMessage{Message: &response},
 	})

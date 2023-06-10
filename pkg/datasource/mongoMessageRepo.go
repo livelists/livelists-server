@@ -66,7 +66,6 @@ func FindChannelByIdentifier(identifier string) (mongoSchemes.Channel, error) {
 	err := channel.Decode(&channelDocument)
 
 	if err != nil {
-		fmt.Println("channel decode err", identifier)
 		return mongoSchemes.Channel{}, err
 	}
 
