@@ -79,7 +79,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	_, joinErr := newConnection.onAuth(r)
+	_, joinErr := newConnection.OnAuth(r)
 
 	if joinErr != nil {
 		w.Write([]byte("accessToken not found"))
@@ -88,12 +88,14 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	conn, _, _, err := u.Upgrade(r, w)
+
 	if err != nil {
 		log.Printf("upgrade error: %s", err)
 		return
 	}
+	newWs := &WsRoom{}
 
-	newConnection.addConnection(&conn)
+	newConnection.AddConnection(&conn)
 	AddWsConnection(&newConnection)
 
 	defer conn.Close()
@@ -138,6 +140,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 
 		case ws.OpClose:
+			newConnection.DisconnectCallback()
 			utf8Fin = true
 
 		case ws.OpContinuation:
@@ -209,12 +212,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		header.Masked = false
-		ws.WriteHeader(conn, header)
-
-		p := make([]byte, header.Length)
-		conn.Write(p)
-
-		HandleEvent(&newConnection, payload)
+		HandleEvent(&newConnection, payload, newWs)
 	}
 }

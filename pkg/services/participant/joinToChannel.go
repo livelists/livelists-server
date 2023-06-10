@@ -26,14 +26,14 @@ func JoinToChannel(args *JoinToChannelArgs) {
 		WsConnectionIdentity: args.WsIdentifier,
 		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{
 			Identifier: args.ChannelId,
-			Type:       shared.RoomName_channel,
+			Type:       wsMessages.WSRoomTypes_Channel,
 		}),
 	})
 	args.WS.JoinToRoom(shared.JoinToRoomArgs{
 		WsConnectionIdentity: args.WsIdentifier,
 		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{
 			Identifier: args.WsIdentifier,
-			Type:       shared.RoomName_participant,
+			Type:       wsMessages.WSRoomTypes_Participant,
 		}),
 	})
 
@@ -80,7 +80,7 @@ func JoinToChannel(args *JoinToChannelArgs) {
 	args.WS.PublishMessage(shared.PublishMessageArgs{
 		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{
 			Identifier: args.WsIdentifier,
-			Type:       shared.RoomName_participant,
+			Type:       wsMessages.WSRoomTypes_Participant,
 		}),
 		Data: wsMessages.InBoundMessage{Message: &meJoinedMessage},
 	})

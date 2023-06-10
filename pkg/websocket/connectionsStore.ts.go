@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"fmt"
 	"github.com/livelists/livelist-server/pkg/shared/helpers"
 )
 
@@ -26,7 +27,18 @@ func AddWsConnection(conn *WsConnection) {
 		Connection: conn,
 	}
 
+	conn.OnDisconnected(func() {
+		fmt.Println(len(cStore.connections[connectionId]))
+
+		fmt.Print("On disconnected")
+	})
+
 	cStore.connections[connectionId] = append(cStore.connections[connectionId], newWrapper)
+}
+
+func removeWsConnection(arr []ConnectionWrapper, i int) []ConnectionWrapper {
+	arr[i] = arr[len(arr)-1]
+	return arr[:len(arr)-1]
 }
 
 func GetWSConnections() map[string][]ConnectionWrapper {
@@ -43,12 +55,12 @@ func (e *connectionNotFoundError) Error() string {
 	return "access token param not found"
 }
 
-type publishToAllSIDsInIdentityArgs struct {
+type PublishToAllSIDsInIdentityArgs struct {
 	Identity string
 	Payload  []byte
 }
 
-func publishToAllSIDsInIdentity(args publishToAllSIDsInIdentityArgs) error {
+func PublishToAllSIDsInIdentity(args PublishToAllSIDsInIdentityArgs) error {
 	connection, ok := cStore.connections[args.Identity]
 
 	if !ok {
@@ -56,7 +68,7 @@ func publishToAllSIDsInIdentity(args publishToAllSIDsInIdentityArgs) error {
 	}
 
 	for _, c := range connection {
-		c.Connection.publishToSID(args.Payload)
+		c.Connection.PublishToSID(args.Payload)
 	}
 
 	return nil

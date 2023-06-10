@@ -35,6 +35,11 @@ func SendMessage(args *SendMessageArgs) {
 		Text: args.Payload.Text,
 		Sender: &wsMessages.ParticipantShortInfo{
 			Identifier: args.SenderIdentifier,
+			LastSeenAt: &timestamp.Timestamp{
+				Seconds: 0,
+				Nanos:   0,
+			},
+			IsOnline:   true,
 			CustomData: args.Payload.CustomData,
 		},
 		LocalId:    args.Payload.LocalId,
@@ -54,7 +59,7 @@ func SendMessage(args *SendMessageArgs) {
 	args.WS.PublishMessage(shared.PublishMessageArgs{
 		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{
 			Identifier: args.ChannelId,
-			Type:       shared.RoomName_channel,
+			Type:       wsMessages.WSRoomTypes_Channel,
 		}),
 		Data: wsMessages.InBoundMessage{Message: &newM},
 	})

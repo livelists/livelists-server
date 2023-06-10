@@ -1,7 +1,6 @@
 package mongoSchemes
 
 import (
-	"fmt"
 	pb "github.com/livelists/livelist-server/contracts/channel"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
@@ -25,7 +24,6 @@ type NewChannelArgs struct {
 }
 
 func NewChannel(args NewChannelArgs) Channel {
-	fmt.Println("channel args", args.Status.String())
 	return Channel{
 		ID:              primitive.NewObjectID(),
 		Identifier:      args.Identifier,

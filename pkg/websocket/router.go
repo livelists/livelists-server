@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/services/channel"
+	"github.com/livelists/livelist-server/pkg/services/customEvents"
 	"github.com/livelists/livelist-server/pkg/services/participant"
 	"google.golang.org/protobuf/proto"
 )
@@ -14,7 +15,7 @@ type SocketEvent struct {
 	Data  map[string]any `json:"data"`
 }
 
-func HandleEvent(conn *WsConnection, message []byte) error {
+func HandleEvent(conn *WsConnection, message []byte, wsRoom *WsRoom) error {
 	parsedMessage := wsMessages.OutBoundMessage{}
 
 	err := proto.Unmarshal(message, &parsedMessage)
@@ -24,7 +25,6 @@ func HandleEvent(conn *WsConnection, message []byte) error {
 		return err
 	}
 
-	newWs := WsRoom{}
 	switch parsedMessage.Message.(type) {
 	case *wsMessages.OutBoundMessage_JoinChannel:
 		channelJoin := parsedMessage.GetJoinChannel()
@@ -32,7 +32,7 @@ func HandleEvent(conn *WsConnection, message []byte) error {
 			Payload:      *channelJoin,
 			WsIdentifier: conn.AccessToken.Identifier(),
 			ChannelId:    conn.AccessToken.ChannelId(),
-			WS:           newWs,
+			WS:           wsRoom,
 		})
 	case *wsMessages.OutBoundMessage_SendMessage:
 		sendMessage := parsedMessage.GetSendMessage()
@@ -40,7 +40,7 @@ func HandleEvent(conn *WsConnection, message []byte) error {
 			Payload:          *sendMessage,
 			ChannelId:        conn.AccessToken.ChannelId(),
 			SenderIdentifier: conn.AccessToken.Identifier(),
-			WS:               newWs,
+			WS:               wsRoom,
 		})
 	case *wsMessages.OutBoundMessage_LoadMoreMessages:
 		payload := parsedMessage.GetLoadMoreMessages()
@@ -49,9 +49,22 @@ func HandleEvent(conn *WsConnection, message []byte) error {
 			Payload:             *payload,
 			ChannelId:           conn.AccessToken.ChannelId(),
 			RequesterIdentifier: conn.AccessToken.Identifier(),
-			WS:                  newWs,
+			WS:                  wsRoom,
 		})
-
+	case *wsMessages.OutBoundMessage_LoadParticipantsReq:
+		payload := parsedMessage.GetLoadParticipantsReq()
+		participant.LoadParticipants(&participant.LoadParticipantsArgs{
+			Payload:             *payload,
+			ChannelIdentifier:   conn.AccessToken.ChannelId(),
+			RequesterIdentifier: conn.AccessToken.Identifier(),
+			WS:                  wsRoom,
+		})
+	case *wsMessages.OutBoundMessage_SendCustomEvent:
+		payload := parsedMessage.GetSendCustomEvent()
+		customEvents.SendEvent(&customEvents.SendEventArgs{
+			Payload: *payload,
+			WS:      wsRoom,
+		})
 	}
 
 	return nil

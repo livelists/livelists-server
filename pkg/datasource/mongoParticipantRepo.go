@@ -7,6 +7,7 @@ import (
 	"github.com/livelists/livelist-server/pkg/config"
 	"github.com/livelists/livelist-server/pkg/datasource/mongoSchemes"
 	"go.mongodb.org/mongo-driver/bson"
+	"time"
 )
 
 var ctx = context.TODO()
@@ -68,7 +69,6 @@ func FindParticipantByIdentifierAndChannel(args FindPByIdAndChannelArgs) (mongoS
 	err := channel.Decode(&channelDocument)
 
 	if err != nil {
-		fmt.Println("channel decode err")
 		return mongoSchemes.Participant{}, err
 	}
 
@@ -84,4 +84,80 @@ func FindParticipantByIdentifierAndChannel(args FindPByIdAndChannelArgs) (mongoS
 	err = participant.Decode(&participantDocument)
 
 	return participantDocument, err
+}
+
+type UpdateParticipantLastSeenAtArgs struct {
+	Identifier        string
+	ChannelIdentifier string
+	LastSeenAt        time.Time
+	IsOnline          bool
+}
+
+func UpdateParticipantLastSeenAt(args UpdateParticipantLastSeenAtArgs) (time.Time, error) {
+	var client = config.GetMongoClient()
+
+	var participant, err = FindParticipantByIdentifierAndChannel(FindPByIdAndChannelArgs{
+		ChannelId:  args.ChannelIdentifier,
+		Identifier: args.Identifier,
+	})
+
+	if err != nil {
+		return args.LastSeenAt, err
+	}
+
+	filter := bson.D{{"_id", participant.ID}}
+	update := bson.D{{"$set", bson.D{{
+		"lastSeenAt", args.LastSeenAt,
+	}, {"isOnline", args.IsOnline}}}}
+
+	var _, updateErr = client.Database(
+		config.MainDatabase).Collection(mongoSchemes.ParticipantCollection).UpdateOne(
+		ctx,
+		filter,
+		update)
+
+	if updateErr != nil {
+		return args.LastSeenAt, updateErr
+	}
+
+	return args.LastSeenAt, nil
+}
+
+type GetShortParticipantsArgs struct {
+	ChannelIdentifier string
+	Limit             int32
+}
+
+func GetShortParticipants(args GetShortParticipantsArgs) ([]mongoSchemes.ShortParticipant, error) {
+	var client = config.GetMongoClient()
+
+	var channelDocument, err = FindChannelByIdentifier(args.ChannelIdentifier)
+
+	if err != nil {
+		return []mongoSchemes.ShortParticipant{}, err
+	}
+
+	participants, err := client.Database(
+		config.MainDatabase).Collection(mongoSchemes.ParticipantCollection).Aggregate(ctx, bson.A{
+		bson.D{{"$match", bson.D{{"channel", channelDocument.ID}}}},
+		bson.D{
+			{"$sort",
+				bson.D{
+					{"isOnline", 1},
+					{"lastSeenAt", 1},
+				},
+			},
+		},
+		bson.D{{"$limit", args.Limit}},
+	})
+
+	var participantsDocuments []mongoSchemes.ShortParticipant
+
+	err = participants.All(ctx, &participantsDocuments)
+
+	if err != nil {
+		return []mongoSchemes.ShortParticipant{}, err
+	}
+
+	return participantsDocuments, nil
 }

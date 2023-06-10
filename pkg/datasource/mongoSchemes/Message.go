@@ -70,5 +70,7 @@ type MessageWithParticipant struct {
 
 type participant struct {
 	Identifier string             `bson:"identifier"`
+	LastSeenAt time.Time          `bson:"lastSeenAt"`
+	IsOnline   bool               `bson:"isOnline"`
 	CustomData *map[string]string `bson:"customData"`
 }

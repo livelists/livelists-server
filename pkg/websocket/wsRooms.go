@@ -54,7 +54,7 @@ func (w WsRoom) PublishMessage(args shared.PublishMessageArgs) bool {
 		return false
 	}
 	for _, connectionId := range room.Connections {
-		publishToAllSIDsInIdentity(publishToAllSIDsInIdentityArgs{
+		PublishToAllSIDsInIdentity(PublishToAllSIDsInIdentityArgs{
 			Identity: connectionId,
 			Payload:  messageBytes,
 		})
