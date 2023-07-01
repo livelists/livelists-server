@@ -1,10 +1,10 @@
 package participant
 
 import (
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/datasource"
 	"github.com/livelists/livelist-server/pkg/shared"
+	"github.com/livelists/livelist-server/pkg/shared/helpers"
 	"time"
 )
 
@@ -51,7 +51,7 @@ type publishBecameOfflineArgs struct {
 func publishBecameOffline(args publishBecameOfflineArgs) {
 	message := wsMessages.ParticipantBecameOffline{
 		Identifier: args.WsIdentifier,
-		LastSeenAt: &timestamp.Timestamp{Seconds: int64(args.LastSeenAt.Second())},
+		LastSeenAt: helpers.DateToTimeStamp(args.LastSeenAt),
 	}
 
 	messageWr := wsMessages.InBoundMessage_ParticipantBecameOffline{

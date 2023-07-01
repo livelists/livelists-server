@@ -51,7 +51,7 @@ message Message {
 
 message CustomEvent {
   WSRoomTypes roomType = 1;
-  string RoomIdentifier = 2;
+  string roomIdentifier = 2;
   string eventName = 3;
   optional CustomData customData = 4;
 }

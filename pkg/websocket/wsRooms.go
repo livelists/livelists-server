@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/shared"
 	"google.golang.org/protobuf/proto"
 )
@@ -65,9 +66,9 @@ func (w WsRoom) PublishMessage(args shared.PublishMessageArgs) bool {
 
 func (w WsRoom) GetRoomName(args shared.GetRoomNameArgs) shared.RoomName {
 	switch args.Type {
-	case shared.RoomName_channel:
+	case wsMessages.WSRoomTypes_Channel:
 		return shared.RoomName("channel_" + args.Identifier)
-	case shared.RoomName_participant:
+	case wsMessages.WSRoomTypes_Participant:
 		return shared.RoomName("participant_" + args.Identifier)
 	}
 	return ""

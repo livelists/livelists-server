@@ -6,6 +6,7 @@ import (
 	"github.com/livelists/livelist-server/pkg/config"
 	"github.com/livelists/livelist-server/pkg/datasource/mongoSchemes"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
 
@@ -155,7 +156,7 @@ func GetMessagesFromChannel(args GetMessagesFromChannelArgs) ([]mongoSchemes.Mes
 	}
 
 	var totalCount, errCount = CountMessagesInChannel(CountMessagesInChannelArgs{
-		ChannelId: channelDocument.ID.String(),
+		ChannelId: channelDocument.ID,
 	})
 
 	if errCount != nil {
@@ -166,17 +167,20 @@ func GetMessagesFromChannel(args GetMessagesFromChannelArgs) ([]mongoSchemes.Mes
 }
 
 type CountMessagesInChannelArgs struct {
-	ChannelId string
+	ChannelId primitive.ObjectID
 }
 
 func CountMessagesInChannel(args CountMessagesInChannelArgs) (int64, error) {
 	var client = config.GetMongoClient()
 
-	messagesCount, err := client.Database(config.MainDatabase).Collection(mongoSchemes.MessageCollection).CountDocuments(ctx, bson.D{{"identifier", args.ChannelId}})
+	messagesCount, err := client.Database(config.MainDatabase).Collection(mongoSchemes.MessageCollection).CountDocuments(ctx, bson.D{{"channel", args.ChannelId}})
 
 	if err != nil {
+		fmt.Println("Count messages error")
 		return 0, err
 	}
+
+	fmt.Println("Count messages", messagesCount)
 
 	return messagesCount, nil
 }
