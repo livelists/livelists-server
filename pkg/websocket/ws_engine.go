@@ -70,7 +70,7 @@ var (
 )
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
-	newConnection := WsConnection{}
+	newConnection := *NewWsConnection()
 
 	u := ws.HTTPUpgrader{
 		Extension: func(opt httphead.Option) bool {

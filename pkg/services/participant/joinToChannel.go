@@ -59,6 +59,7 @@ func JoinToChannel(args *JoinToChannelArgs) {
 			Channel: &wsMessages.ChannelInitialInfo{
 				ChannelId:       args.ChannelId,
 				HistoryMessages: messages,
+				TotalMessages:   messagesCount,
 			},
 		},
 	}

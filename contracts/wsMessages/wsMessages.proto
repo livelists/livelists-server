@@ -87,9 +87,9 @@ message ParticipantBecameOffline {
 }
 
 message LoadParticipantsReq {
-  int32 PageSize = 1;
+  int32 pageSize = 1;
 }
 message LoadParticipantsRes {
   repeated ParticipantShortInfo participants  = 1;
-  int32 PageSize = 2;
+  int32 pageSize = 2;
 }

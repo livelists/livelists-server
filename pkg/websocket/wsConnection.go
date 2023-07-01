@@ -1,21 +1,27 @@
 package websocket
 
 import (
-	"fmt"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
 	accessTokenService "github.com/livelists/livelist-server/pkg/services/accessToken"
 	"github.com/livelists/livelist-server/pkg/services/participant"
+	"github.com/livelists/livelist-server/pkg/shared/helpers"
 	"net"
 	"net/http"
 	"net/url"
-	"time"
 )
 
 type WsConnection struct {
+	Sid                string
 	AccessToken        accessTokenService.AccessToken
 	DisconnectCallback func()
 	Connection         *net.Conn
+}
+
+func NewWsConnection() *WsConnection {
+	return &WsConnection{
+		Sid: helpers.RandStringRunes(8),
+	}
 }
 
 type TokenParseError struct{}
@@ -60,33 +66,6 @@ func (WsC *WsConnection) AddConnection(conn *net.Conn) {
 		WS:                newWs,
 	})
 	WsC.Connection = conn
-	//WsC.startDetectDisconnection(conn)
-}
-
-func (WsC *WsConnection) startDetectDisconnection(conn *net.Conn) {
-	one := make([]byte, 1)
-	ticker := time.NewTicker(5 * time.Second)
-	quit := make(chan struct{})
-
-	go func() {
-		var c = *conn
-		c.SetReadDeadline(time.Now().Add(10 * time.Second))
-
-		for {
-			select {
-			case <-ticker.C:
-				if _, err := c.Read(one); err != nil {
-					ticker.Stop()
-					fmt.Print("disconnect err", err)
-					//WsC.disconnectCallback()
-				}
-				c.SetReadDeadline(time.Now().Add(10 * time.Second))
-			case <-quit:
-				ticker.Stop()
-				return
-			}
-		}
-	}()
 }
 
 func (WsC *WsConnection) PublishToSID(payload []byte) error {
