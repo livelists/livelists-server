@@ -59,3 +59,9 @@ message CustomEvent {
 message CustomData {
   map<string, string> data = 1;
 }
+
+message ShortChannel {
+    string  id = 1;
+    string identifier = 2;
+    optional CustomData customData = 4;
+}

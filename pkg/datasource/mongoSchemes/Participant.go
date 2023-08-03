@@ -9,6 +9,7 @@ import (
 const ParticipantCollection = "Participant"
 
 type ShortParticipant struct {
+	ID         string             `bson:"id"`
 	Identifier string             `bson:"identifier"`
 	CustomData *map[string]string `bson:"customData"`
 	LastSeenAt time.Time          `bson:"lastSeenAt"`
@@ -19,7 +20,7 @@ type Participant struct {
 	ID         primitive.ObjectID `bson:"_id"`
 	Identifier string             `bson:"identifier"`
 	Status     string             `bson:"status"`
-	Channel    primitive.ObjectID `bson:"channel"`
+	Channel    string             `bson:"channel"`
 	CustomData *map[string]string `bson:"customData"`
 	Grants     Grants             `bson:"grants"`
 	LastSeenAt time.Time          `bson:"lastSeenAt"`
@@ -35,10 +36,10 @@ type Grants struct {
 }
 
 type NewParticipantArgs struct {
-	Identifier string
-	ChannelId  primitive.ObjectID
-	Grants     pb.ChannelParticipantGrants
-	CustomData *pb.CustomData
+	Identifier        string
+	ChannelIdentifier string
+	Grants            pb.ChannelParticipantGrants
+	CustomData        *pb.CustomData
 }
 
 func NewParticipant(args NewParticipantArgs) Participant {
@@ -48,7 +49,7 @@ func NewParticipant(args NewParticipantArgs) Participant {
 		return Participant{
 			ID:         primitive.NewObjectID(),
 			Identifier: args.Identifier,
-			Channel:    args.ChannelId,
+			Channel:    args.ChannelIdentifier,
 			CustomData: &args.CustomData.Data,
 			LastSeenAt: time.Unix(0, 0),
 			IsOnline:   false,
@@ -65,7 +66,7 @@ func NewParticipant(args NewParticipantArgs) Participant {
 	return Participant{
 		ID:         primitive.NewObjectID(),
 		Identifier: args.Identifier,
-		Channel:    args.ChannelId,
+		Channel:    args.ChannelIdentifier,
 		CustomData: nil,
 		Grants: Grants{
 			Admin:        FalseIfNil(args.Grants.Admin),

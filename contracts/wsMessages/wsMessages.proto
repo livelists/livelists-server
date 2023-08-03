@@ -14,6 +14,7 @@ message OutBoundMessage {
     LoadMoreMessages loadMoreMessages = 3;
     LoadParticipantsReq loadParticipantsReq = 4;
     CustomEvent sendCustomEvent = 5;
+    LoadChannelsWithMsgReq loadChannelsWithMsgReq = 6;
   }
 }
 
@@ -27,6 +28,7 @@ message InBoundMessage {
     ParticipantBecameOffline participantBecameOffline = 5;
     LoadParticipantsRes loadParticipantsRes = 6;
     CustomEvent newCustomEvent = 7;
+    LoadChannelsWithMsgRes loadChannelsWithMsgRes = 8;
   }
 }
 
@@ -92,4 +94,16 @@ message LoadParticipantsReq {
 message LoadParticipantsRes {
   repeated ParticipantShortInfo participants  = 1;
   int32 pageSize = 2;
+}
+
+message LoadChannelsWithMsgReq {
+  int32 messagesLimit = 1;
+}
+
+message ChannelWithMsg {
+  ShortChannel channel = 1;
+  repeated Message messages = 2;
+}
+message LoadChannelsWithMsgRes {
+  repeated ChannelWithMsg channels = 1;
 }

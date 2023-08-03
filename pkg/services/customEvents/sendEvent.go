@@ -1,7 +1,6 @@
 package customEvents
 
 import (
-	"fmt"
 	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/shared"
 )
@@ -20,8 +19,6 @@ func SendEvent(args *SendEventArgs) {
 			CustomData:     args.Payload.CustomData,
 		},
 	}
-
-	fmt.Print(args.Payload.RoomIdentifier)
 
 	args.WS.PublishMessage(shared.PublishMessageArgs{
 		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{
