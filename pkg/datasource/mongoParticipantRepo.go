@@ -2,7 +2,6 @@ package datasource
 
 import (
 	"context"
-	"fmt"
 	pb "github.com/livelists/livelist-server/contracts/participant"
 	"github.com/livelists/livelist-server/pkg/config"
 	"github.com/livelists/livelist-server/pkg/datasource/mongoSchemes"
@@ -22,26 +21,14 @@ type AddParticipantArgs struct {
 func AddParticipant(args AddParticipantArgs) (mongoSchemes.Participant, error) {
 	var client = config.GetMongoClient()
 
-	channel := client.Database(
-		config.MainDatabase).Collection(mongoSchemes.ChannelCollection).FindOne(
-		ctx, bson.D{{"identifier", args.Channel}})
-
-	var channelDocument mongoSchemes.Channel
-	err := channel.Decode(&channelDocument)
-
-	if err != nil {
-		fmt.Println("channel decode err")
-		return mongoSchemes.Participant{}, err
-	}
-
 	newParticipant := mongoSchemes.NewParticipant(mongoSchemes.NewParticipantArgs{
-		Identifier: args.Identifier,
-		ChannelId:  channelDocument.ID,
-		Grants:     args.Grants,
-		CustomData: args.CustomData,
+		Identifier:        args.Identifier,
+		ChannelIdentifier: args.Channel,
+		Grants:            args.Grants,
+		CustomData:        args.CustomData,
 	})
 
-	_, err = client.Database(config.MainDatabase).Collection(
+	_, err := client.Database(config.MainDatabase).Collection(
 		mongoSchemes.ParticipantCollection).InsertOne(ctx, newParticipant)
 
 	return mongoSchemes.Participant{
@@ -61,27 +48,16 @@ type FindPByIdAndChannelArgs struct {
 func FindParticipantByIdentifierAndChannel(args FindPByIdAndChannelArgs) (mongoSchemes.Participant, error) {
 	var client = config.GetMongoClient()
 
-	channel := client.Database(
-		config.MainDatabase).Collection(mongoSchemes.ChannelCollection).FindOne(
-		ctx, bson.D{{"identifier", args.ChannelId}})
-
-	var channelDocument mongoSchemes.Channel
-	err := channel.Decode(&channelDocument)
-
-	if err != nil {
-		return mongoSchemes.Participant{}, err
-	}
-
 	participant := client.Database(
 		config.MainDatabase).Collection(mongoSchemes.ParticipantCollection).FindOne(ctx, bson.D{
 		{
 			"identifier", args.Identifier,
 		}, {
-			"channel", channelDocument.ID,
+			"channel", args.ChannelId,
 		}})
 
 	var participantDocument mongoSchemes.Participant
-	err = participant.Decode(&participantDocument)
+	err := participant.Decode(&participantDocument)
 
 	return participantDocument, err
 }
@@ -131,15 +107,9 @@ type GetShortParticipantsArgs struct {
 func GetShortParticipants(args GetShortParticipantsArgs) ([]mongoSchemes.ShortParticipant, error) {
 	var client = config.GetMongoClient()
 
-	var channelDocument, err = FindChannelByIdentifier(args.ChannelIdentifier)
-
-	if err != nil {
-		return []mongoSchemes.ShortParticipant{}, err
-	}
-
 	participants, err := client.Database(
 		config.MainDatabase).Collection(mongoSchemes.ParticipantCollection).Aggregate(ctx, bson.A{
-		bson.D{{"$match", bson.D{{"channel", channelDocument.ID}}}},
+		bson.D{{"$match", bson.D{{"channel", args.ChannelIdentifier}}}},
 		bson.D{
 			{"$sort",
 				bson.D{

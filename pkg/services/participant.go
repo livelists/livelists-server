@@ -39,7 +39,7 @@ func (p ParticipantService) AddParticipantToChannel(ctx context.Context, req *pb
 	return &pb.AddParticipantToChannelRes{
 		Participant: &pb.Participant{
 			Identifier: part.Identifier,
-			ChannelId:  part.Channel.String(),
+			ChannelId:  part.Channel,
 			CreatedAt:  &timestamp.Timestamp{Seconds: int64(part.CreatedAt.Second())},
 			Status:     pb.ParticipantStatus_Active,
 		},

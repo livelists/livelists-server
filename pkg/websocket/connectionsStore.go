@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"fmt"
 	"github.com/livelists/livelist-server/pkg/services/participant"
 	"golang.org/x/exp/slices"
 )
@@ -60,7 +59,6 @@ type IsHasAnotherCh struct {
 
 func isHasAnotherConnectionToChannel(args IsHasAnotherCh) bool {
 	var anotherConnectionId = slices.IndexFunc(cStore.connections[args.ConnectionId], func(c *WsConnection) bool {
-		fmt.Println(c.AccessToken.ChannelId(), args.DisconnectedChannelId)
 		return c.AccessToken.ChannelId() == args.DisconnectedChannelId && c.Sid != args.Conn.Sid
 	})
 

@@ -65,6 +65,13 @@ func HandleEvent(conn *WsConnection, message []byte, wsRoom *WsRoom) error {
 			Payload: *payload,
 			WS:      wsRoom,
 		})
+	case *wsMessages.OutBoundMessage_LoadChannelsWithMsgReq:
+		payload := parsedMessage.GetLoadChannelsWithMsgReq()
+		channel.GetMyChannelsWithMsg(&channel.GetChannelsArgs{
+			RequesterIdentifier: conn.AccessToken.Identifier(),
+			MessagesLimit:       payload.MessagesLimit,
+			WS:                  wsRoom,
+		})
 	}
 
 	return nil

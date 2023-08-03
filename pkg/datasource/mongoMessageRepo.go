@@ -6,7 +6,6 @@ import (
 	"github.com/livelists/livelist-server/pkg/config"
 	"github.com/livelists/livelist-server/pkg/datasource/mongoSchemes"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
 
@@ -22,27 +21,29 @@ type AddMessageArgs struct {
 func AddMessage(args AddMessageArgs) (mongoSchemes.Message, error) {
 	var client = config.GetMongoClient()
 
-	var channelDocument, err = FindChannelByIdentifier(args.ChannelIdentifier)
-
 	participant := client.Database(
 		config.MainDatabase).Collection(mongoSchemes.ParticipantCollection).FindOne(
 		ctx, bson.D{{"identifier", args.SenderIdentifier}})
 
+	fmt.Println("sender identifier", args.SenderIdentifier)
+
 	var participantDocument mongoSchemes.Participant
-	err = participant.Decode(&participantDocument)
+	err := participant.Decode(&participantDocument)
 
 	if err != nil {
 		fmt.Println("participant decode err")
 		return mongoSchemes.Message{}, err
 	}
 
+	fmt.Println("after participant decode")
+
 	newMessage := mongoSchemes.NewMessage(mongoSchemes.NewMessageArgs{
-		ChannelId:  channelDocument.ID,
-		SenderId:   participantDocument.ID,
-		Text:       args.Text,
-		Type:       args.Type,
-		SubType:    args.SubType,
-		CustomData: args.CustomData,
+		ChannelIdentifier: args.ChannelIdentifier,
+		SenderId:          participantDocument.ID,
+		Text:              args.Text,
+		Type:              args.Type,
+		SubType:           args.SubType,
+		CustomData:        args.CustomData,
 	})
 
 	_, err = client.Database(
@@ -56,23 +57,6 @@ func AddMessage(args AddMessageArgs) (mongoSchemes.Message, error) {
 	return newMessage, nil
 }
 
-func FindChannelByIdentifier(identifier string) (mongoSchemes.Channel, error) {
-	var client = config.GetMongoClient()
-
-	channel := client.Database(
-		config.MainDatabase).Collection(mongoSchemes.ChannelCollection).FindOne(
-		ctx, bson.D{{"identifier", identifier}})
-
-	var channelDocument mongoSchemes.Channel
-	err := channel.Decode(&channelDocument)
-
-	if err != nil {
-		return mongoSchemes.Channel{}, err
-	}
-
-	return channelDocument, nil
-}
-
 type GetMessagesFromChannelArgs struct {
 	ChannelIdentifier string
 	Skip              int
@@ -83,18 +67,12 @@ type GetMessagesFromChannelArgs struct {
 func GetMessagesFromChannel(args GetMessagesFromChannelArgs) ([]mongoSchemes.MessageWithParticipant, int64, error) {
 	var client = config.GetMongoClient()
 
-	var channelDocument, err = FindChannelByIdentifier(args.ChannelIdentifier)
-
-	if err != nil {
-		return []mongoSchemes.MessageWithParticipant{}, 0, err
-	}
-
 	messages, err := client.Database(
 		config.MainDatabase).Collection(mongoSchemes.MessageCollection).Aggregate(ctx, bson.A{
 		bson.D{
 			{"$match",
 				bson.D{
-					{"channel", channelDocument.ID},
+					{"channel", args.ChannelIdentifier},
 					{"createdAt", bson.D{{"$lt", args.StartFromDate}}},
 				},
 			},
@@ -156,7 +134,7 @@ func GetMessagesFromChannel(args GetMessagesFromChannelArgs) ([]mongoSchemes.Mes
 	}
 
 	var totalCount, errCount = CountMessagesInChannel(CountMessagesInChannelArgs{
-		ChannelId: channelDocument.ID,
+		ChannelIdentifier: args.ChannelIdentifier,
 	})
 
 	if errCount != nil {
@@ -167,20 +145,18 @@ func GetMessagesFromChannel(args GetMessagesFromChannelArgs) ([]mongoSchemes.Mes
 }
 
 type CountMessagesInChannelArgs struct {
-	ChannelId primitive.ObjectID
+	ChannelIdentifier string
 }
 
 func CountMessagesInChannel(args CountMessagesInChannelArgs) (int64, error) {
 	var client = config.GetMongoClient()
 
-	messagesCount, err := client.Database(config.MainDatabase).Collection(mongoSchemes.MessageCollection).CountDocuments(ctx, bson.D{{"channel", args.ChannelId}})
+	messagesCount, err := client.Database(config.MainDatabase).Collection(mongoSchemes.MessageCollection).CountDocuments(ctx, bson.D{{"channel", args.ChannelIdentifier}})
 
 	if err != nil {
 		fmt.Println("Count messages error")
 		return 0, err
 	}
-
-	fmt.Println("Count messages", messagesCount)
 
 	return messagesCount, nil
 }
