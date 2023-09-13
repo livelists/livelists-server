@@ -59,11 +59,12 @@ func NewMessage(args NewMessageArgs) Message {
 }
 
 type MessageWithParticipant struct {
-	Id          string             `bson:"id"`
-	Text        string             `bson:"text"`
-	CustomData  *map[string]string `bson:"customData"`
-	Type        string             `bson:"type"`
-	SubType     string             `bson:"subType"`
-	CreatedAt   time.Time          `bson:"createdAt"`
-	Participant ShortParticipant   `bson:"participant"`
+	Id                string             `bson:"id"`
+	ChannelIdentifier string             `bson:"channelIdentifier"`
+	Text              string             `bson:"text"`
+	CustomData        *map[string]string `bson:"customData"`
+	Type              string             `bson:"type"`
+	SubType           string             `bson:"subType"`
+	CreatedAt         time.Time          `bson:"createdAt"`
+	Participant       ShortParticipant   `bson:"participant"`
 }

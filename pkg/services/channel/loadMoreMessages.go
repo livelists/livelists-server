@@ -20,7 +20,6 @@ func LoadMoreMessages(args *LoadMoreMessagesArgs) {
 	if args.Payload.FirstLoadedCreatedAt != nil {
 		startFromDate = args.Payload.FirstLoadedCreatedAt.AsTime()
 	}
-
 	messages, totalCount, err := message.GetMessages(message.GetMessagesArgs{
 		StartFromDate:     startFromDate,
 		Offset:            int(args.Payload.SkipFromFirstLoaded),

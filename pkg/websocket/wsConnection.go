@@ -3,8 +3,10 @@ package websocket
 import (
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
+	"github.com/livelists/livelist-server/contracts/wsMessages"
 	accessTokenService "github.com/livelists/livelist-server/pkg/services/accessToken"
 	"github.com/livelists/livelist-server/pkg/services/participant"
+	"github.com/livelists/livelist-server/pkg/shared"
 	"github.com/livelists/livelist-server/pkg/shared/helpers"
 	"net"
 	"net/http"
@@ -59,11 +61,18 @@ func (WsC *WsConnection) OnDisconnected(callback func()) {
 func (WsC *WsConnection) AddConnection(conn *net.Conn) {
 	newWs := &WsRoom{}
 
+	newWs.JoinToRoom(shared.JoinToRoomArgs{
+		WsConnectionIdentity: WsC.AccessToken.Identifier(),
+		RoomName: newWs.GetRoomName(shared.GetRoomNameArgs{
+			Identifier: WsC.AccessToken.Identifier(),
+			Type:       wsMessages.WSRoomTypes_Participant,
+		}),
+	})
+
 	participant.UpdateLastSeenAt(&participant.UpdateLastSeenAtArgs{
-		WsIdentifier:      WsC.AccessToken.Identifier(),
-		ChannelIdentifier: WsC.AccessToken.ChannelId(),
-		IsOnline:          true,
-		WS:                newWs,
+		WsIdentifier: WsC.AccessToken.Identifier(),
+		IsOnline:     true,
+		WS:           newWs,
 	})
 	WsC.Connection = conn
 }

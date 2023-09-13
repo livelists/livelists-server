@@ -33,14 +33,16 @@ message InBoundMessage {
 }
 
 message SendMessage {
-  string text = 1;
-  string localId = 2;
-  optional CustomData customData = 3;
+  string channelId = 1;
+  string text = 2;
+  string localId = 3;
+  optional CustomData customData = 4;
 }
 
 message JoinChannel {
-  int64 initialPageSize = 1;
-  int64 initialOffset = 2;
+  string channelId = 1;
+  int64 initialPageSize = 2;
+  int64 initialOffset = 3;
 }
 
 message ChannelInitialInfo {
@@ -62,15 +64,16 @@ message MeJoinedToChannel {
 }
 
 message LoadMoreMessages {
-  int32 PageSize = 1;
-  optional google.protobuf.Timestamp FirstLoadedCreatedAt = 2;
-  int32 SkipFromFirstLoaded = 3;
+  string channelId = 1;
+  int32 pageSize = 2;
+  optional google.protobuf.Timestamp firstLoadedCreatedAt = 3;
+  int32 skipFromFirstLoaded = 4;
 }
 
 message LoadMoreMessagesRequestInfo {
-  int32 PageSize = 1;
-  optional google.protobuf.Timestamp FirstLoadedCreatedAt = 2;
-  int32 SkipFromFirstLoaded = 3;
+  int32 pageSize = 1;
+  optional google.protobuf.Timestamp firstLoadedCreatedAt = 2;
+  int32 skipFromFirstLoaded = 3;
 }
 
 message LoadMoreMessagesRes {
@@ -89,7 +92,8 @@ message ParticipantBecameOffline {
 }
 
 message LoadParticipantsReq {
-  int32 pageSize = 1;
+  string channelId = 1;
+  int32 pageSize = 2;
 }
 message LoadParticipantsRes {
   repeated ParticipantShortInfo participants  = 1;

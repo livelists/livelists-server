@@ -6,6 +6,7 @@ import (
 	"github.com/livelists/livelist-server/pkg/config"
 	"github.com/livelists/livelist-server/pkg/datasource/mongoSchemes"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
 
@@ -73,11 +74,13 @@ func GetMessagesFromChannel(args GetMessagesFromChannelArgs) ([]mongoSchemes.Mes
 			{"$match",
 				bson.D{
 					{"channel", args.ChannelIdentifier},
-					{"createdAt", bson.D{{"$lt", args.StartFromDate}}},
+					{"createdAt", bson.D{{"$lt", primitive.NewDateTimeFromTime(args.StartFromDate)}}},
 				},
 			},
 		},
-		bson.D{{"$sort", bson.D{{"createdAt", -1}}}},
+		bson.D{{"$sort", bson.D{
+			{"createdAt", -1},
+		}}},
 		bson.D{{"$skip", args.Skip}},
 		bson.D{{"$limit", args.Limit}},
 		bson.D{{"$sort", bson.D{{"createdAt", 1}}}},
@@ -115,6 +118,7 @@ func GetMessagesFromChannel(args GetMessagesFromChannelArgs) ([]mongoSchemes.Mes
 					{"id", 1},
 					{"text", 1},
 					{"customData", 1},
+					{"channelIdentifier", args.ChannelIdentifier},
 					{"type", 1},
 					{"subType", 1},
 					{"participant.identifier", 1},
@@ -123,6 +127,7 @@ func GetMessagesFromChannel(args GetMessagesFromChannelArgs) ([]mongoSchemes.Mes
 				},
 			},
 		},
+		bson.D{{"$sort", bson.D{{"createdAt", 1}}}},
 	})
 
 	var messagesDocuments []mongoSchemes.MessageWithParticipant

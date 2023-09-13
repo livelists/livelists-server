@@ -30,7 +30,6 @@ func (p ParticipantService) AddParticipantToChannel(ctx context.Context, req *pb
 		Admin:        req.Grants.Admin,
 	})
 	token.AddUser(req.Identifier)
-	token.AddChannelId(req.ChannelId)
 
 	tokenStr, err := token.Sign()
 
@@ -66,7 +65,6 @@ func (p ParticipantService) GetParticipantAccessToken(ctx context.Context, req *
 		Admin:        &part.Grants.Admin,
 	})
 	token.AddUser(part.Identifier)
-	token.AddChannelId(req.ChannelId)
 
 	tokenStr, err := token.Sign()
 

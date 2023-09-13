@@ -62,6 +62,25 @@ func FindParticipantByIdentifierAndChannel(args FindPByIdAndChannelArgs) (mongoS
 	return participantDocument, err
 }
 
+type FindAllParticipantsByIdArgs struct {
+	Identifier string
+}
+
+func FindAllParticipantsById(args FindAllParticipantsByIdArgs) ([]mongoSchemes.Participant, error) {
+	var client = config.GetMongoClient()
+
+	participant, _ := client.Database(
+		config.MainDatabase).Collection(mongoSchemes.ParticipantCollection).Find(ctx, bson.D{
+		{
+			"identifier", args.Identifier,
+		}})
+
+	var participantsDocuments []mongoSchemes.Participant
+	err := participant.All(ctx, &participantsDocuments)
+
+	return participantsDocuments, err
+}
+
 type UpdateParticipantLastSeenAtArgs struct {
 	Identifier        string
 	ChannelIdentifier string

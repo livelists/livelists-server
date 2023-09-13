@@ -22,19 +22,10 @@ func JoinToChannel(args *JoinToChannelArgs) {
 		Identifier: args.WsIdentifier,
 	})
 
-	args.WS.JoinToRoom(shared.JoinToRoomArgs{
-		WsConnectionIdentity: args.WsIdentifier,
-		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{
-			Identifier: args.ChannelId,
-			Type:       wsMessages.WSRoomTypes_Channel,
-		}),
-	})
-	args.WS.JoinToRoom(shared.JoinToRoomArgs{
-		WsConnectionIdentity: args.WsIdentifier,
-		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{
-			Identifier: args.WsIdentifier,
-			Type:       wsMessages.WSRoomTypes_Participant,
-		}),
+	JoinToChannelRoom(&JoinToChannelRoomArgs{
+		WsIdentifier: args.WsIdentifier,
+		ChannelId:    args.ChannelId,
+		WS:           args.WS,
 	})
 
 	messages, messagesCount, err := message.GetMessages(message.GetMessagesArgs{
