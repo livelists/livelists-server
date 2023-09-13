@@ -42,11 +42,12 @@ message Message {
   string id = 1;
   optional ParticipantShortInfo sender = 2;
   string text = 3;
-  MessageType type = 4;
-  MessageSubType subType = 5;
-  string localId = 6;
-  optional CustomData customData = 7;
-  google.protobuf.Timestamp createdAt = 8;
+  string channelIdentifier = 4;
+  MessageType type = 5;
+  MessageSubType subType = 6;
+  string localId = 7;
+  optional CustomData customData = 8;
+  google.protobuf.Timestamp createdAt = 9;
 }
 
 message CustomEvent {

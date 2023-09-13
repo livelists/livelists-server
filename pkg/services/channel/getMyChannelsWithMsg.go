@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/datasource"
+	"github.com/livelists/livelist-server/pkg/services/participant"
 	"github.com/livelists/livelist-server/pkg/shared"
 	"github.com/livelists/livelist-server/pkg/shared/helpers"
 )
@@ -23,6 +24,14 @@ func GetMyChannelsWithMsg(args *GetChannelsArgs) {
 	if err != nil {
 		fmt.Println("GetMyChannelsError")
 		return
+	}
+
+	for _, c := range channels {
+		participant.JoinToChannelRoom(&participant.JoinToChannelRoomArgs{
+			ChannelId:    c.Channel.Identifier,
+			WsIdentifier: args.RequesterIdentifier,
+			WS:           args.WS,
+		})
 	}
 	args.WS.PublishMessage(shared.PublishMessageArgs{
 		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{

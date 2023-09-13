@@ -26,20 +26,16 @@ func AddWsConnection(conn *WsConnection) {
 }
 
 func onWsDisconnected(conn *WsConnection, connectionId string) {
-	var disconnectedChannelId = conn.AccessToken.ChannelId()
-
 	if !isHasAnotherConnectionToChannel(IsHasAnotherCh{
-		DisconnectedChannelId: disconnectedChannelId,
-		ConnectionId:          connectionId,
-		Conn:                  conn,
+		ConnectionId: connectionId,
+		Conn:         conn,
 	}) {
 		newWs := &WsRoom{}
 
 		participant.UpdateLastSeenAt(&participant.UpdateLastSeenAtArgs{
-			WsIdentifier:      conn.AccessToken.Identifier(),
-			ChannelIdentifier: conn.AccessToken.ChannelId(),
-			IsOnline:          false,
-			WS:                newWs,
+			WsIdentifier: conn.AccessToken.Identifier(),
+			IsOnline:     false,
+			WS:           newWs,
 		})
 	}
 
@@ -52,14 +48,13 @@ func onWsDisconnected(conn *WsConnection, connectionId string) {
 }
 
 type IsHasAnotherCh struct {
-	Conn                  *WsConnection
-	ConnectionId          string
-	DisconnectedChannelId string
+	Conn         *WsConnection
+	ConnectionId string
 }
 
 func isHasAnotherConnectionToChannel(args IsHasAnotherCh) bool {
 	var anotherConnectionId = slices.IndexFunc(cStore.connections[args.ConnectionId], func(c *WsConnection) bool {
-		return c.AccessToken.ChannelId() == args.DisconnectedChannelId && c.Sid != args.Conn.Sid
+		return c.Sid != args.Conn.Sid
 	})
 
 	if anotherConnectionId == -1 {

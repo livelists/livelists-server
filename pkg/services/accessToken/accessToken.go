@@ -20,7 +20,6 @@ type AccessToken struct {
 	isServiceRoot *bool
 	grants        GrantsData
 	identifier    string
-	channelId     string
 	isValid       *bool
 }
 
@@ -30,10 +29,6 @@ func (at *AccessToken) AddGrants(grants GrantsData) {
 
 func (at *AccessToken) AddUser(identifier string) {
 	at.identifier = identifier
-}
-
-func (at *AccessToken) AddChannelId(channelId string) {
-	at.channelId = channelId
 }
 
 func (at *AccessToken) Parse(tokenStr string) (bool, error) {
@@ -56,7 +51,6 @@ func (at *AccessToken) Parse(tokenStr string) (bool, error) {
 			Admin:        &admin,
 			ReadMessages: &readMessages,
 		})
-		at.AddChannelId(claims["ChannelId"].(string))
 		at.AddUser(claims["Identifier"].(string))
 		at.isValid = &token.Valid
 	} else {
@@ -75,7 +69,6 @@ func (at *AccessToken) Sign() (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"IsServiceRoot": helpers.FalseIfNil(at.isServiceRoot),
 		"Identifier":    at.identifier,
-		"ChannelId":     at.channelId,
 		"SendMessage":   helpers.FalseIfNil(at.grants.SendMessage),
 		"ReadMessages":  helpers.FalseIfNil(at.grants.ReadMessages),
 		"Admin":         helpers.FalseIfNil(at.grants.Admin),
@@ -100,7 +93,4 @@ func (at *AccessToken) Identifier() string {
 }
 func (at *AccessToken) IsValid() bool {
 	return helpers.FalseIfNil(at.isValid)
-}
-func (at *AccessToken) ChannelId() string {
-	return at.channelId
 }

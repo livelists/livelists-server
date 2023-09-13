@@ -11,12 +11,13 @@ func MongoMessagesToPB(messages []mongoSchemes.MessageWithParticipant) []*wsMess
 
 	for i, m := range messages {
 		messagesPb[i] = &wsMessages.Message{
-			Id:         m.Id,
-			Text:       m.Text,
-			SubType:    wsMessages.MessageSubType(wsMessages.MessageSubType_value[m.SubType]),
-			Type:       wsMessages.MessageType(wsMessages.MessageSubType_value[m.Type]),
-			LocalId:    "",
-			CustomData: CustomDataFormat(m.CustomData),
+			Id:                m.Id,
+			Text:              m.Text,
+			SubType:           wsMessages.MessageSubType(wsMessages.MessageSubType_value[m.SubType]),
+			Type:              wsMessages.MessageType(wsMessages.MessageSubType_value[m.Type]),
+			LocalId:           "",
+			ChannelIdentifier: m.ChannelIdentifier,
+			CustomData:        CustomDataFormat(m.CustomData),
 			Sender: &wsMessages.ParticipantShortInfo{
 				Identifier: m.Participant.Identifier,
 				LastSeenAt: &timestamp.Timestamp{

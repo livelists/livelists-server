@@ -1,7 +1,7 @@
 port: 7771
-api_key: <api_key>
-secret_key: <api_secret>
+api_key: 'apiKey'
+secret_key: 'secretKey'
 redis:
   address: 'localhost:6739'
 mongo:
-  uri: 'mongodb://localhost:27017/'
+  uri: 'mongodb://mongo-livelists:27017/'

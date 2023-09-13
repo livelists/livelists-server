@@ -31,14 +31,14 @@ func HandleEvent(conn *WsConnection, message []byte, wsRoom *WsRoom) error {
 		participant.JoinToChannel(&participant.JoinToChannelArgs{
 			Payload:      *channelJoin,
 			WsIdentifier: conn.AccessToken.Identifier(),
-			ChannelId:    conn.AccessToken.ChannelId(),
+			ChannelId:    channelJoin.ChannelId,
 			WS:           wsRoom,
 		})
 	case *wsMessages.OutBoundMessage_SendMessage:
 		sendMessage := parsedMessage.GetSendMessage()
 		channel.SendMessage(&channel.SendMessageArgs{
 			Payload:          *sendMessage,
-			ChannelId:        conn.AccessToken.ChannelId(),
+			ChannelId:        sendMessage.ChannelId,
 			SenderIdentifier: conn.AccessToken.Identifier(),
 			WS:               wsRoom,
 		})
@@ -47,7 +47,7 @@ func HandleEvent(conn *WsConnection, message []byte, wsRoom *WsRoom) error {
 
 		channel.LoadMoreMessages(&channel.LoadMoreMessagesArgs{
 			Payload:             *payload,
-			ChannelId:           conn.AccessToken.ChannelId(),
+			ChannelId:           payload.ChannelId,
 			RequesterIdentifier: conn.AccessToken.Identifier(),
 			WS:                  wsRoom,
 		})
@@ -55,7 +55,7 @@ func HandleEvent(conn *WsConnection, message []byte, wsRoom *WsRoom) error {
 		payload := parsedMessage.GetLoadParticipantsReq()
 		participant.LoadParticipants(&participant.LoadParticipantsArgs{
 			Payload:             *payload,
-			ChannelIdentifier:   conn.AccessToken.ChannelId(),
+			ChannelIdentifier:   payload.ChannelId,
 			RequesterIdentifier: conn.AccessToken.Identifier(),
 			WS:                  wsRoom,
 		})

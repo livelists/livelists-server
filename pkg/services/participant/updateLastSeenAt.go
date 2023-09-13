@@ -9,35 +9,40 @@ import (
 )
 
 type UpdateLastSeenAtArgs struct {
-	ChannelIdentifier string
-	WsIdentifier      string
-	IsOnline          bool
-	WS                shared.WsRoom
+	WsIdentifier string
+	IsOnline     bool
+	WS           shared.WsRoom
 }
 
 func UpdateLastSeenAt(args *UpdateLastSeenAtArgs) {
 	var now = time.Now()
 
-	datasource.UpdateParticipantLastSeenAt(datasource.UpdateParticipantLastSeenAtArgs{
-		ChannelIdentifier: args.ChannelIdentifier,
-		Identifier:        args.WsIdentifier,
-		LastSeenAt:        now,
-		IsOnline:          args.IsOnline,
+	myParticipants, _ := datasource.FindAllParticipantsById(datasource.FindAllParticipantsByIdArgs{
+		Identifier: args.WsIdentifier,
 	})
 
-	if args.IsOnline {
-		publishBecameOnline(publishBecameOnlineArgs{
-			WS:                args.WS,
-			WsIdentifier:      args.WsIdentifier,
-			ChannelIdentifier: args.ChannelIdentifier,
-		})
-	} else {
-		publishBecameOffline(publishBecameOfflineArgs{
-			WS:                args.WS,
-			WsIdentifier:      args.WsIdentifier,
-			ChannelIdentifier: args.ChannelIdentifier,
+	for _, p := range myParticipants {
+		datasource.UpdateParticipantLastSeenAt(datasource.UpdateParticipantLastSeenAtArgs{
+			ChannelIdentifier: p.Channel,
+			Identifier:        args.WsIdentifier,
 			LastSeenAt:        now,
+			IsOnline:          args.IsOnline,
 		})
+
+		if args.IsOnline {
+			publishBecameOnline(publishBecameOnlineArgs{
+				WS:                args.WS,
+				WsIdentifier:      args.WsIdentifier,
+				ChannelIdentifier: p.Channel,
+			})
+		} else {
+			publishBecameOffline(publishBecameOfflineArgs{
+				WS:                args.WS,
+				WsIdentifier:      args.WsIdentifier,
+				ChannelIdentifier: p.Channel,
+				LastSeenAt:        now,
+			})
+		}
 	}
 }
 

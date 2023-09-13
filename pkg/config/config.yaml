@@ -4,4 +4,4 @@ secret_key: 'secretKey'
 redis:
   address: 'localhost:6739'
 mongo:
-  uri: 'mongodb://localhost:57017/'
+  uri: 'mongodb://mongo-livelists:27017/'
