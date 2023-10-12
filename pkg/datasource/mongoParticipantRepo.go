@@ -6,6 +6,7 @@ import (
 	"github.com/livelists/livelist-server/pkg/config"
 	"github.com/livelists/livelist-server/pkg/datasource/mongoSchemes"
 	"go.mongodb.org/mongo-driver/bson"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
 
@@ -91,16 +92,12 @@ type UpdateParticipantLastSeenAtArgs struct {
 func UpdateParticipantLastSeenAt(args UpdateParticipantLastSeenAtArgs) (time.Time, error) {
 	var client = config.GetMongoClient()
 
-	var participant, err = FindParticipantByIdentifierAndChannel(FindPByIdAndChannelArgs{
-		ChannelId:  args.ChannelIdentifier,
-		Identifier: args.Identifier,
-	})
+	filter := bson.D{{
+		"identifier", args.Identifier,
+	}, {
+		"channel", args.ChannelIdentifier,
+	}}
 
-	if err != nil {
-		return args.LastSeenAt, err
-	}
-
-	filter := bson.D{{"_id", participant.ID}}
 	update := bson.D{{"$set", bson.D{{
 		"lastSeenAt", args.LastSeenAt,
 	}, {"isOnline", args.IsOnline}}}}
@@ -149,4 +146,36 @@ func GetShortParticipants(args GetShortParticipantsArgs) ([]mongoSchemes.ShortPa
 	}
 
 	return participantsDocuments, nil
+}
+
+type UpdateLastMessageSeenAtArgs struct {
+	LastSeenAt        *timestamppb.Timestamp
+	Identifier        string
+	ChannelIdentifier string
+}
+
+func UpdateLastMessageSeenAt(args UpdateLastMessageSeenAtArgs) (time.Time, error) {
+	var client = config.GetMongoClient()
+
+	filter := bson.D{{
+		"identifier", args.Identifier,
+	}, {
+		"channel", args.ChannelIdentifier,
+	}}
+
+	update := bson.D{{"$set", bson.D{{
+		"lastSeenMessageCreatedAt", args.LastSeenAt.AsTime(),
+	}}}}
+
+	var _, updateErr = client.Database(
+		config.MainDatabase).Collection(mongoSchemes.ParticipantCollection).UpdateOne(
+		ctx,
+		filter,
+		update)
+
+	if updateErr != nil {
+		return args.LastSeenAt.AsTime(), updateErr
+	}
+
+	return args.LastSeenAt.AsTime(), nil
 }

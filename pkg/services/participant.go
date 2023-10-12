@@ -5,11 +5,16 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	pb "github.com/livelists/livelist-server/contracts/participant"
+	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/datasource"
 	"github.com/livelists/livelist-server/pkg/services/accessToken"
+	"github.com/livelists/livelist-server/pkg/services/message"
+	"github.com/livelists/livelist-server/pkg/shared"
 )
 
-type ParticipantService struct{}
+type ParticipantService struct {
+	WS shared.WsRoom
+}
 
 func (p ParticipantService) AddParticipantToChannel(ctx context.Context, req *pb.AddParticipantToChannelReq) (*pb.AddParticipantToChannelRes, error) {
 	part, err := datasource.AddParticipant(datasource.AddParticipantArgs{
@@ -33,7 +38,19 @@ func (p ParticipantService) AddParticipantToChannel(ctx context.Context, req *pb
 
 	tokenStr, err := token.Sign()
 
-	fmt.Println(err)
+	if err == nil {
+		message.CreateMessage(&message.CreateMessageArgs{
+			Payload: message.CreateMessagePayload{
+				Text:    req.Identifier,
+				LocalId: "-",
+			},
+			ChannelId:        req.ChannelId,
+			SenderIdentifier: nil,
+			WS:               p.WS,
+			Type:             wsMessages.MessageType_System,
+			SubType:          wsMessages.MessageSubType_ParticipantJoined,
+		})
+	}
 
 	return &pb.AddParticipantToChannelRes{
 		Participant: &pb.Participant{

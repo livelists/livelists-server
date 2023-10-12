@@ -45,7 +45,7 @@ func getConfigString(configFile string) (string, error) {
 func getConfig() (*config.Config, error) {
 	path, err := os.Getwd()
 	fmt.Print("path::", path, "endPath")
-	confString, err := getConfigString(path + "config.yaml")
+	confString, err := getConfigString(path + "/pkg/config/config.yaml")
 	if err != nil {
 		return nil, err
 	}

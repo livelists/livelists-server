@@ -15,6 +15,7 @@ message OutBoundMessage {
     LoadParticipantsReq loadParticipantsReq = 4;
     CustomEvent sendCustomEvent = 5;
     LoadChannelsWithMsgReq loadChannelsWithMsgReq = 6;
+    UpdateLastSeenMessageAtReq updateLastSeenMessageAtReq = 7;
   }
 }
 
@@ -29,6 +30,8 @@ message InBoundMessage {
     LoadParticipantsRes loadParticipantsRes = 6;
     CustomEvent newCustomEvent = 7;
     LoadChannelsWithMsgRes loadChannelsWithMsgRes = 8;
+    ChannelLastSeenMessageUpdated channelLastSeenMessageUpdated = 9;
+    UpdateLastSeenMessageAtRes updateLastSeenMessageAtRes = 10;
   }
 }
 
@@ -48,7 +51,11 @@ message JoinChannel {
 message ChannelInitialInfo {
   string channelId = 1;
   int64 totalMessages = 2;
-  repeated Message historyMessages = 3;
+  google.protobuf.Timestamp firstMessageCreatedAt = 3;
+  google.protobuf.Timestamp lastMessageCreatedAt = 4;
+  int64 notSeenMessagesCount = 5;
+  google.protobuf.Timestamp lastSeenMessageCreatedAt = 6;
+  repeated Message historyMessages = 7;
 }
 
 message MeJoined {
@@ -67,7 +74,8 @@ message LoadMoreMessages {
   string channelId = 1;
   int32 pageSize = 2;
   optional google.protobuf.Timestamp firstLoadedCreatedAt = 3;
-  int32 skipFromFirstLoaded = 4;
+  bool isLoadOlder = 4;
+  int32 skipFromFirstLoaded = 5;
 }
 
 message LoadMoreMessagesRequestInfo {
@@ -80,7 +88,9 @@ message LoadMoreMessagesRes {
   LoadMoreMessagesRequestInfo requestInfo = 1;
   bool isSuccess = 2;
   int64 totalMessages = 3;
-  repeated Message messages = 4;
+  google.protobuf.Timestamp firstMessageCreatedAt = 4;
+  google.protobuf.Timestamp lastMessageCreatedAt = 5;
+  repeated Message messages = 6;
 }
 
 message ParticipantBecameOnline {
@@ -106,8 +116,24 @@ message LoadChannelsWithMsgReq {
 
 message ChannelWithMsg {
   ShortChannel channel = 1;
-  repeated Message messages = 2;
+  int64 notSeenMessagesCount = 2;
+  repeated Message messages = 3;
 }
 message LoadChannelsWithMsgRes {
   repeated ChannelWithMsg channels = 1;
+}
+
+message UpdateLastSeenMessageAtReq {
+  string channelId = 1;
+  google.protobuf.Timestamp lastSeenAt = 2;
+}
+
+message UpdateLastSeenMessageAtRes {
+  string channelId = 1;
+  google.protobuf.Timestamp lastSeenAt = 2;
+}
+
+message ChannelLastSeenMessageUpdated {
+  string channelId = 1;
+  google.protobuf.Timestamp lastSeenAt = 2;
 }

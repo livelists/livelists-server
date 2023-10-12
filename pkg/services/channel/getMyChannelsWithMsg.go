@@ -62,13 +62,16 @@ func loadChannels(args *loadChannelsArgs) ([]*wsMessages.ChannelWithMsg, error) 
 	channelsPb := make([]*wsMessages.ChannelWithMsg, len(channels))
 
 	for i, ch := range channels {
+		fmt.Println(ch.UnreadCount)
 		channelsPb[i] = &wsMessages.ChannelWithMsg{
 			Channel: &wsMessages.ShortChannel{
 				Id:         ch.Channel.Id,
 				Identifier: ch.Channel.Identifier,
+				CreatedAt:  helpers.DateToTimeStamp(ch.Channel.CreatedAt),
 				CustomData: helpers.CustomDataFormat(ch.Channel.CustomData),
 			},
-			Messages: helpers.MongoMessagesToPB(ch.Messages),
+			NotSeenMessagesCount: ch.UnreadCount,
+			Messages:             helpers.MongoMessagesToPB(ch.Messages),
 		}
 	}
 

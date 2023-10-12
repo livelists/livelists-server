@@ -4,6 +4,7 @@ import (
 	channel_pb "github.com/livelists/livelist-server/contracts/channel"
 	participant_pb "github.com/livelists/livelist-server/contracts/participant"
 	"github.com/livelists/livelist-server/pkg/services"
+	"github.com/livelists/livelist-server/pkg/websocket"
 	"log"
 	"net/http"
 )
@@ -14,7 +15,8 @@ func StartTwirpRPC() {
 	channelSVC := services.ChannelService{}
 	channelHandler := channel_pb.NewChannelServiceServer(&channelSVC)
 	participantSVC := services.ParticipantService{}
-	participantHandler := participant_pb.NewParticipantServiceServer(&participantSVC)
+	participantSVC.WS = websocket.WsRoom{}
+	participantHandler := participant_pb.NewParticipantServiceServer(participantSVC)
 
 	mux := http.NewServeMux()
 	mux.Handle(channelHandler.PathPrefix(), channelHandler)

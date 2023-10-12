@@ -6,7 +6,6 @@ import (
 	"github.com/livelists/livelist-server/pkg/services/message"
 	"github.com/livelists/livelist-server/pkg/shared"
 	"github.com/livelists/livelist-server/pkg/shared/helpers"
-	"time"
 )
 
 type JoinToChannelArgs struct {
@@ -28,11 +27,22 @@ func JoinToChannel(args *JoinToChannelArgs) {
 		WS:           args.WS,
 	})
 
-	messages, messagesCount, err := message.GetMessages(message.GetMessagesArgs{
+	createdAtDate, err := datasource.GetMessageCreatedAtByOffset(datasource.GetMessageCreatedAtByOffsetArgs{
+		Offset:            10,
+		StartDate:         meParticipant.LastSeenMessageCreatedAt,
+		ChannelIdentifier: args.ChannelId,
+	})
+
+	messagesResult, err := message.GetMessages(message.GetMessagesArgs{
 		PageSize:          int(args.Payload.InitialPageSize),
 		Offset:            int(args.Payload.InitialOffset),
 		ChannelIdentifier: args.ChannelId,
-		StartFromDate:     time.Now(),
+		StartFromDate:     createdAtDate,
+	})
+
+	notSeenCount, err := datasource.CountMessagesInChannelAfterDate(datasource.CountMessagesInChannelAfterDateArgs{
+		ChannelIdentifier: args.ChannelId,
+		Date:              meParticipant.LastSeenMessageCreatedAt,
 	})
 
 	meJoinedMessage := wsMessages.InBoundMessage_MeJoinedToChannel{
@@ -48,9 +58,13 @@ func JoinToChannel(args *JoinToChannelArgs) {
 			},
 			IsSuccess: true,
 			Channel: &wsMessages.ChannelInitialInfo{
-				ChannelId:       args.ChannelId,
-				HistoryMessages: messages,
-				TotalMessages:   messagesCount,
+				ChannelId:                args.ChannelId,
+				NotSeenMessagesCount:     notSeenCount,
+				LastSeenMessageCreatedAt: helpers.DateToTimeStamp(meParticipant.LastSeenMessageCreatedAt),
+				FirstMessageCreatedAt:    helpers.DateToTimeStamp(messagesResult.FirstMessageCreatedAt),
+				LastMessageCreatedAt:     helpers.DateToTimeStamp(messagesResult.LastMessageCreatedAt),
+				TotalMessages:            messagesResult.TotalCount,
+				HistoryMessages:          messagesResult.Messages,
 			},
 		},
 	}
@@ -61,9 +75,11 @@ func JoinToChannel(args *JoinToChannelArgs) {
 				Me:        &wsMessages.MeJoined{},
 				IsSuccess: false,
 				Channel: &wsMessages.ChannelInitialInfo{
-					ChannelId:       args.ChannelId,
-					TotalMessages:   messagesCount,
-					HistoryMessages: messages,
+					ChannelId:             args.ChannelId,
+					TotalMessages:         0,
+					FirstMessageCreatedAt: nil,
+					LastMessageCreatedAt:  nil,
+					HistoryMessages:       []*wsMessages.Message{},
 				},
 			},
 		}

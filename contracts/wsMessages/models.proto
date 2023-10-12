@@ -64,5 +64,6 @@ message CustomData {
 message ShortChannel {
     string  id = 1;
     string identifier = 2;
+    google.protobuf.Timestamp createdAt = 3;
     optional CustomData customData = 4;
 }

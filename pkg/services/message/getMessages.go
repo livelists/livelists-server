@@ -14,13 +14,25 @@ type GetMessagesArgs struct {
 	StartFromDate     time.Time
 }
 
-func GetMessages(args GetMessagesArgs) ([]*wsMessages.Message, int64, error) {
-	messages, totalCount, err := datasource.GetMessagesFromChannel(datasource.GetMessagesFromChannelArgs{
+type GetMessagesRes struct {
+	Messages              []*wsMessages.Message
+	TotalCount            int64
+	FirstMessageCreatedAt time.Time
+	LastMessageCreatedAt  time.Time
+}
+
+func GetMessages(args GetMessagesArgs) (GetMessagesRes, error) {
+	result, err := datasource.GetMessagesFromChannel(datasource.GetMessagesFromChannelArgs{
 		ChannelIdentifier: args.ChannelIdentifier,
 		Limit:             args.PageSize,
 		Skip:              args.Offset,
 		StartFromDate:     args.StartFromDate,
 	})
 
-	return helpers.MongoMessagesToPB(messages), totalCount, err
+	return GetMessagesRes{
+		Messages:              helpers.MongoMessagesToPB(*result.Messages),
+		TotalCount:            result.TotalCount,
+		FirstMessageCreatedAt: result.FirstMessageCreatedAt,
+		LastMessageCreatedAt:  result.LastMessageCreatedAt,
+	}, err
 }
