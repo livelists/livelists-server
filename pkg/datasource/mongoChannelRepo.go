@@ -107,7 +107,7 @@ func GetParticipantsChannelsWithMessages(args GetParticipantChWithMsgArgs) ([]mo
 									bson.D{
 										{"from", "Participant"},
 										{"localField", "participant"},
-										{"foreignField", "_id"},
+										{"foreignField", "participant"},
 										{"as", "participant"},
 									},
 								},
@@ -135,6 +135,71 @@ func GetParticipantsChannelsWithMessages(args GetParticipantChWithMsgArgs) ([]mo
 			},
 		},
 		bson.D{
+			{"$lookup",
+				bson.D{
+					{"from", "Message"},
+					{"as", "unreadCount"},
+					{"let",
+						bson.D{
+							{"channelIdentifier", "$channel.identifier"},
+							{"lastSeenMessageCreatedAt", "$lastSeenMessageCreatedAt"},
+						},
+					},
+					{"pipeline",
+						bson.A{
+							bson.D{
+								{"$match",
+									bson.D{
+										{"$expr",
+											bson.D{
+												{"$and",
+													bson.A{
+														bson.D{
+															{"$eq",
+																bson.A{
+																	"$channel",
+																	"$$channelIdentifier",
+																},
+															},
+														},
+														bson.D{
+															{"$gte",
+																bson.A{
+																	"$createdAt",
+																	"$$lastSeenMessageCreatedAt",
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+							bson.D{{"$count", "totalCount"}},
+						},
+					},
+				},
+			},
+		},
+		bson.D{
+			{"$addFields",
+				bson.D{
+					{"unreadCount",
+						bson.D{
+							{"$arrayElemAt",
+								bson.A{
+									"$unreadCount",
+									0,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		bson.D{
 			{"$project",
 				bson.D{
 					{"_id", 0},
@@ -142,6 +207,7 @@ func GetParticipantsChannelsWithMessages(args GetParticipantChWithMsgArgs) ([]mo
 					{"channel.identifier", 1},
 					{"channel.customData", 1},
 					{"channel.status", 1},
+					{"channel.createdAt", 1},
 					{"messages.id", 1},
 					{"messages.text", 1},
 					{"messages.customData", 1},
@@ -154,6 +220,7 @@ func GetParticipantsChannelsWithMessages(args GetParticipantChWithMsgArgs) ([]mo
 					{"messages.participant.customData", 1},
 					{"messages.participant.lastSeenAt", 1},
 					{"messages.participant.isOnline", 1},
+					{"unreadCount", "$unreadCount.totalCount"},
 				},
 			},
 		},

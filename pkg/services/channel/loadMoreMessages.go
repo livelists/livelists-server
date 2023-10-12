@@ -4,6 +4,7 @@ import (
 	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/services/message"
 	"github.com/livelists/livelist-server/pkg/shared"
+	"github.com/livelists/livelist-server/pkg/shared/helpers"
 	"time"
 )
 
@@ -20,7 +21,7 @@ func LoadMoreMessages(args *LoadMoreMessagesArgs) {
 	if args.Payload.FirstLoadedCreatedAt != nil {
 		startFromDate = args.Payload.FirstLoadedCreatedAt.AsTime()
 	}
-	messages, totalCount, err := message.GetMessages(message.GetMessagesArgs{
+	messagesResult, err := message.GetMessages(message.GetMessagesArgs{
 		StartFromDate:     startFromDate,
 		Offset:            int(args.Payload.SkipFromFirstLoaded),
 		PageSize:          int(args.Payload.PageSize),
@@ -34,9 +35,11 @@ func LoadMoreMessages(args *LoadMoreMessagesArgs) {
 				FirstLoadedCreatedAt: args.Payload.FirstLoadedCreatedAt,
 				SkipFromFirstLoaded:  args.Payload.SkipFromFirstLoaded,
 			},
-			IsSuccess:     true,
-			TotalMessages: totalCount,
-			Messages:      messages,
+			IsSuccess:             true,
+			FirstMessageCreatedAt: helpers.DateToTimeStamp(messagesResult.FirstMessageCreatedAt),
+			LastMessageCreatedAt:  helpers.DateToTimeStamp(messagesResult.LastMessageCreatedAt),
+			TotalMessages:         messagesResult.TotalCount,
+			Messages:              messagesResult.Messages,
 		},
 	}
 
@@ -48,9 +51,11 @@ func LoadMoreMessages(args *LoadMoreMessagesArgs) {
 					FirstLoadedCreatedAt: args.Payload.FirstLoadedCreatedAt,
 					SkipFromFirstLoaded:  args.Payload.SkipFromFirstLoaded,
 				},
-				IsSuccess:     false,
-				TotalMessages: totalCount,
-				Messages:      messages,
+				IsSuccess:             false,
+				TotalMessages:         0,
+				FirstMessageCreatedAt: nil,
+				LastMessageCreatedAt:  nil,
+				Messages:              []*wsMessages.Message{},
 			},
 		}
 	}

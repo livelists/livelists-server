@@ -72,6 +72,13 @@ func HandleEvent(conn *WsConnection, message []byte, wsRoom *WsRoom) error {
 			MessagesLimit:       payload.MessagesLimit,
 			WS:                  wsRoom,
 		})
+	case *wsMessages.OutBoundMessage_UpdateLastSeenMessageAtReq:
+		payload := parsedMessage.GetUpdateLastSeenMessageAtReq()
+		participant.UpdateLastMessageSeenAt(&participant.UpdateLastMessageSeenAtArgs{
+			ChannelId:           payload.ChannelId,
+			RequesterIdentifier: conn.AccessToken.Identifier(),
+			LastSeenAt:          payload.LastSeenAt,
+		})
 	}
 
 	return nil

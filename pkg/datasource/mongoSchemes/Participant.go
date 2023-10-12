@@ -17,16 +17,17 @@ type ShortParticipant struct {
 }
 
 type Participant struct {
-	ID         primitive.ObjectID `bson:"_id"`
-	Identifier string             `bson:"identifier"`
-	Status     string             `bson:"status"`
-	Channel    string             `bson:"channel"`
-	CustomData *map[string]string `bson:"customData"`
-	Grants     Grants             `bson:"grants"`
-	LastSeenAt time.Time          `bson:"lastSeenAt"`
-	IsOnline   bool               `bson:"isOnline"`
-	CreatedAt  time.Time          `bson:"createdAt"`
-	UpdatedAt  time.Time          `bson:"updatedAt"`
+	ID                       primitive.ObjectID `bson:"_id"`
+	Identifier               string             `bson:"identifier"`
+	Status                   string             `bson:"status"`
+	Channel                  string             `bson:"channel"`
+	CustomData               *map[string]string `bson:"customData"`
+	Grants                   Grants             `bson:"grants"`
+	LastSeenAt               time.Time          `bson:"lastSeenAt"`
+	LastSeenMessageCreatedAt time.Time          `bson:"lastSeenMessageCreatedAt"`
+	IsOnline                 bool               `bson:"isOnline"`
+	CreatedAt                time.Time          `bson:"createdAt"`
+	UpdatedAt                time.Time          `bson:"updatedAt"`
 }
 
 type Grants struct {
@@ -47,12 +48,13 @@ func NewParticipant(args NewParticipantArgs) Participant {
 
 	if args.CustomData != nil {
 		return Participant{
-			ID:         primitive.NewObjectID(),
-			Identifier: args.Identifier,
-			Channel:    args.ChannelIdentifier,
-			CustomData: &args.CustomData.Data,
-			LastSeenAt: time.Unix(0, 0),
-			IsOnline:   false,
+			ID:                       primitive.NewObjectID(),
+			Identifier:               args.Identifier,
+			Channel:                  args.ChannelIdentifier,
+			CustomData:               &args.CustomData.Data,
+			LastSeenAt:               time.Unix(0, 0),
+			LastSeenMessageCreatedAt: time.Now(),
+			IsOnline:                 false,
 			Grants: Grants{
 				Admin:        FalseIfNil(args.Grants.Admin),
 				SendMessage:  FalseIfNil(args.Grants.SendMessage),

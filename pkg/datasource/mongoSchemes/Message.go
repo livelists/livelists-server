@@ -11,7 +11,7 @@ const MessageCollection = "Message"
 type Message struct {
 	ID         primitive.ObjectID `bson:"_id"`
 	Channel    string             `bson:"channel"`
-	Sender     primitive.ObjectID `bson:"participant"`
+	Sender     *string            `bson:"participant"`
 	Text       string             `bson:"text"`
 	CustomData *map[string]string `bson:"customData"`
 	Type       string             `bson:"type"`
@@ -23,7 +23,7 @@ type Message struct {
 
 type NewMessageArgs struct {
 	ChannelIdentifier string
-	SenderId          primitive.ObjectID
+	SenderIdentifier  *string
 	Text              string
 	Type              string
 	SubType           string
@@ -36,7 +36,7 @@ func NewMessage(args NewMessageArgs) Message {
 		return Message{
 			ID:         primitive.NewObjectID(),
 			Channel:    args.ChannelIdentifier,
-			Sender:     args.SenderId,
+			Sender:     args.SenderIdentifier,
 			Text:       args.Text,
 			Type:       args.Type,
 			SubType:    args.SubType,
@@ -48,7 +48,7 @@ func NewMessage(args NewMessageArgs) Message {
 	return Message{
 		ID:         primitive.NewObjectID(),
 		Channel:    args.ChannelIdentifier,
-		Sender:     args.SenderId,
+		Sender:     args.SenderIdentifier,
 		Text:       args.Text,
 		Type:       args.Type,
 		SubType:    args.SubType,
@@ -67,4 +67,9 @@ type MessageWithParticipant struct {
 	SubType           string             `bson:"subType"`
 	CreatedAt         time.Time          `bson:"createdAt"`
 	Participant       ShortParticipant   `bson:"participant"`
+}
+
+type LastAndFirstMessagesCreatedAt struct {
+	FirstMessageCreatedAt time.Time `bson:"firstMessageCreatedAt"`
+	LastMessageCreatedAt  time.Time `bson:"lastMessageCreatedAt"`
 }

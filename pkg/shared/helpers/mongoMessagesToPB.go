@@ -14,7 +14,7 @@ func MongoMessagesToPB(messages []mongoSchemes.MessageWithParticipant) []*wsMess
 			Id:                m.Id,
 			Text:              m.Text,
 			SubType:           wsMessages.MessageSubType(wsMessages.MessageSubType_value[m.SubType]),
-			Type:              wsMessages.MessageType(wsMessages.MessageSubType_value[m.Type]),
+			Type:              wsMessages.MessageType(wsMessages.MessageType_value[m.Type]),
 			LocalId:           "",
 			ChannelIdentifier: m.ChannelIdentifier,
 			CustomData:        CustomDataFormat(m.CustomData),

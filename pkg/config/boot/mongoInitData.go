@@ -29,6 +29,11 @@ func SeedMongo(client *mongo.Client, config *confPackage.Config) {
 	}
 	db.Collection(mongoSchemes.MessageCollection).Indexes().CreateOne(context.TODO(), messageParticipantIndexModel)
 
+	messageCreatedAtIndexModel := mongo.IndexModel{
+		Keys: bson.D{{"createdAt", -1}},
+	}
+	db.Collection(mongoSchemes.MessageCollection).Indexes().CreateOne(context.TODO(), messageCreatedAtIndexModel)
+
 	datasource.AddAuthInfo(client, datasource.AddAuthInfoArgs{
 		ApiKey:    config.ApiKey,
 		SecretKey: config.SecretKey,
