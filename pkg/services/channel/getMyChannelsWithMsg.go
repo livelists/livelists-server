@@ -62,7 +62,6 @@ func loadChannels(args *loadChannelsArgs) ([]*wsMessages.ChannelWithMsg, error) 
 	channelsPb := make([]*wsMessages.ChannelWithMsg, len(channels))
 
 	for i, ch := range channels {
-		fmt.Println(ch.UnreadCount)
 		channelsPb[i] = &wsMessages.ChannelWithMsg{
 			Channel: &wsMessages.ShortChannel{
 				Id:         ch.Channel.Id,

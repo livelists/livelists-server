@@ -3,6 +3,7 @@ package channel
 import (
 	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/services/message"
+	"github.com/livelists/livelist-server/pkg/services/participant"
 	"github.com/livelists/livelist-server/pkg/shared"
 )
 
@@ -14,7 +15,7 @@ type SendMessageArgs struct {
 }
 
 func SendMessage(args *SendMessageArgs) {
-	message.CreateMessage(&message.CreateMessageArgs{
+	var createdMessage, messageCreateErr = message.CreateMessage(&message.CreateMessageArgs{
 		Payload: message.CreateMessagePayload{
 			Text:       args.Payload.Text,
 			LocalId:    args.Payload.LocalId,
@@ -26,4 +27,13 @@ func SendMessage(args *SendMessageArgs) {
 		Type:             wsMessages.MessageType_ParticipantCreated,
 		SubType:          wsMessages.MessageSubType_TextMessage,
 	})
+
+	if messageCreateErr == nil {
+		participant.UpdateLastMessageSeenAt(&participant.UpdateLastMessageSeenAtArgs{
+			ChannelId:           args.ChannelId,
+			RequesterIdentifier: args.SenderIdentifier,
+			LastSeenAtUnixMS:    createdMessage.CreatedAt.UnixMilli(),
+			WS:                  args.WS,
+		})
+	}
 }

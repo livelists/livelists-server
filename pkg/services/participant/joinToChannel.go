@@ -35,6 +35,7 @@ func JoinToChannel(args *JoinToChannelArgs) {
 
 	messagesResult, err := message.GetMessages(message.GetMessagesArgs{
 		PageSize:          int(args.Payload.InitialPageSize),
+		IsLoadOlder:       false,
 		Offset:            int(args.Payload.InitialOffset),
 		ChannelIdentifier: args.ChannelId,
 		StartFromDate:     createdAtDate,

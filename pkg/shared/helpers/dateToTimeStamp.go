@@ -8,6 +8,6 @@ import (
 func DateToTimeStamp(date time.Time) *timestamp.Timestamp {
 	return &timestamp.Timestamp{
 		Seconds: date.Unix(),
-		Nanos:   int32(date.UnixNano()),
+		Nanos:   int32(date.Nanosecond()),
 	}
 }

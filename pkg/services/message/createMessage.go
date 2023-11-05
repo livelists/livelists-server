@@ -5,7 +5,9 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/datasource"
+	"github.com/livelists/livelist-server/pkg/datasource/mongoSchemes"
 	"github.com/livelists/livelist-server/pkg/shared"
+	"github.com/livelists/livelist-server/pkg/shared/helpers"
 )
 
 type CreateMessagePayload struct {
@@ -23,7 +25,7 @@ type CreateMessageArgs struct {
 	WS               shared.WsRoom
 }
 
-func CreateMessage(args *CreateMessageArgs) {
+func CreateMessage(args *CreateMessageArgs) (*mongoSchemes.Message, error) {
 	createdMessage, err := datasource.AddMessage(datasource.AddMessageArgs{
 		Text:              args.Payload.Text,
 		CustomData:        args.Payload.CustomData,
@@ -35,7 +37,7 @@ func CreateMessage(args *CreateMessageArgs) {
 
 	if err != nil {
 		fmt.Println("createMessageErr", err)
-		return
+		return nil, err
 	}
 
 	message := wsMessages.Message{
@@ -46,13 +48,15 @@ func CreateMessage(args *CreateMessageArgs) {
 		Type:              args.Type,
 		SubType:           args.SubType,
 		CustomData:        args.Payload.CustomData,
-		CreatedAt: &timestamp.Timestamp{
-			Seconds: createdMessage.CreatedAt.Unix(),
-			Nanos:   int32(createdMessage.CreatedAt.UnixNano()),
-		},
+		CreatedAt:         helpers.DateToTimeStamp(createdMessage.CreatedAt),
 	}
 
 	if args.SenderIdentifier != nil {
+		participant, _ := datasource.FindParticipantByIdentifierAndChannel(datasource.FindPByIdAndChannelArgs{
+			Identifier: *args.SenderIdentifier,
+			ChannelId:  args.ChannelId,
+		})
+
 		message.Sender = &wsMessages.ParticipantShortInfo{
 			Identifier: *args.SenderIdentifier,
 			LastSeenAt: &timestamp.Timestamp{
@@ -60,7 +64,7 @@ func CreateMessage(args *CreateMessageArgs) {
 				Nanos:   0,
 			},
 			IsOnline:   true,
-			CustomData: args.Payload.CustomData,
+			CustomData: helpers.CustomDataFormat(participant.CustomData),
 		}
 	}
 
@@ -75,4 +79,6 @@ func CreateMessage(args *CreateMessageArgs) {
 		}),
 		Data: wsMessages.InBoundMessage{Message: &newM},
 	})
+
+	return &createdMessage, nil
 }
