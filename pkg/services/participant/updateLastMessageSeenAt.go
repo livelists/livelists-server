@@ -4,13 +4,14 @@ import (
 	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/datasource"
 	"github.com/livelists/livelist-server/pkg/shared"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"github.com/livelists/livelist-server/pkg/shared/helpers"
+	"time"
 )
 
 type UpdateLastMessageSeenAtArgs struct {
 	ChannelId           string
 	RequesterIdentifier string
-	LastSeenAt          *timestamppb.Timestamp
+	LastSeenAtUnixMS    int64
 	WS                  shared.WsRoom
 }
 
@@ -24,7 +25,7 @@ func UpdateLastMessageSeenAt(args *UpdateLastMessageSeenAtArgs) {
 		return
 	}
 
-	var isAfterCurrentDate = args.LastSeenAt.GetSeconds() > meParticipant.LastSeenMessageCreatedAt.Unix()
+	var isAfterCurrentDate = args.LastSeenAtUnixMS > meParticipant.LastSeenMessageCreatedAt.UnixMilli()
 
 	if !isAfterCurrentDate {
 		return
@@ -33,9 +34,9 @@ func UpdateLastMessageSeenAt(args *UpdateLastMessageSeenAtArgs) {
 	datasource.UpdateLastMessageSeenAt(datasource.UpdateLastMessageSeenAtArgs{
 		ChannelIdentifier: args.ChannelId,
 		Identifier:        args.RequesterIdentifier,
-		LastSeenAt:        args.LastSeenAt,
+		LastSeenAtUnixMS:  args.LastSeenAtUnixMS,
 	})
-
+	
 	args.WS.PublishMessage(shared.PublishMessageArgs{
 		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{
 			Identifier: args.RequesterIdentifier,
@@ -44,7 +45,7 @@ func UpdateLastMessageSeenAt(args *UpdateLastMessageSeenAtArgs) {
 		Data: wsMessages.InBoundMessage{Message: &wsMessages.InBoundMessage_UpdateLastSeenMessageAtRes{
 			UpdateLastSeenMessageAtRes: &wsMessages.UpdateLastSeenMessageAtRes{
 				ChannelId:  args.ChannelId,
-				LastSeenAt: args.LastSeenAt,
+				LastSeenAt: helpers.DateToTimeStamp(time.UnixMilli(args.LastSeenAtUnixMS)),
 			},
 		}},
 	})

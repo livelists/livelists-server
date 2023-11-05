@@ -10,6 +10,7 @@ import (
 type GetMessagesArgs struct {
 	PageSize          int
 	Offset            int
+	IsLoadOlder       bool
 	ChannelIdentifier string
 	StartFromDate     time.Time
 }
@@ -25,6 +26,7 @@ func GetMessages(args GetMessagesArgs) (GetMessagesRes, error) {
 	result, err := datasource.GetMessagesFromChannel(datasource.GetMessagesFromChannelArgs{
 		ChannelIdentifier: args.ChannelIdentifier,
 		Limit:             args.PageSize,
+		IsLoadOlder:       args.IsLoadOlder,
 		Skip:              args.Offset,
 		StartFromDate:     args.StartFromDate,
 	})

@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"github.com/go-logr/logr"
 	"go.uber.org/zap/zapcore"
 )
@@ -33,7 +32,6 @@ func Debugw(msg string, keysAndValues ...interface{}) {
 }
 
 func Infow(msg string, keysAndValues ...interface{}) {
-	fmt.Println(pkgLogger)
 	pkgLogger.Infow(msg, keysAndValues...)
 }
 

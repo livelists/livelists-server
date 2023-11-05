@@ -47,6 +47,7 @@ func AddMessage(args AddMessageArgs) (mongoSchemes.Message, error) {
 type GetMessagesFromChannelArgs struct {
 	ChannelIdentifier string
 	Skip              int
+	IsLoadOlder       bool
 	Limit             int
 	StartFromDate     time.Time
 }
@@ -60,13 +61,19 @@ type GetMessagesFromChannelRes struct {
 func GetMessagesFromChannel(args GetMessagesFromChannelArgs) (GetMessagesFromChannelRes, error) {
 	var client = config.GetMongoClient()
 
+	var dateFilter = "$gte"
+
+	if args.IsLoadOlder {
+		dateFilter = "$lt"
+	}
+
 	messages, err := client.Database(
 		config.MainDatabase).Collection(mongoSchemes.MessageCollection).Aggregate(ctx, bson.A{
 		bson.D{
 			{"$match",
 				bson.D{
 					{"channel", args.ChannelIdentifier},
-					{"createdAt", bson.D{{"$gte", primitive.NewDateTimeFromTime(args.StartFromDate)}}},
+					{"createdAt", bson.D{{dateFilter, primitive.NewDateTimeFromTime(args.StartFromDate)}}},
 				},
 			},
 		},

@@ -77,7 +77,8 @@ func HandleEvent(conn *WsConnection, message []byte, wsRoom *WsRoom) error {
 		participant.UpdateLastMessageSeenAt(&participant.UpdateLastMessageSeenAtArgs{
 			ChannelId:           payload.ChannelId,
 			RequesterIdentifier: conn.AccessToken.Identifier(),
-			LastSeenAt:          payload.LastSeenAt,
+			LastSeenAtUnixMS:    payload.LastSeenAtUnixMS,
+			WS:                  wsRoom,
 		})
 	}
 

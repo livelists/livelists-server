@@ -107,7 +107,7 @@ func GetParticipantsChannelsWithMessages(args GetParticipantChWithMsgArgs) ([]mo
 									bson.D{
 										{"from", "Participant"},
 										{"localField", "participant"},
-										{"foreignField", "participant"},
+										{"foreignField", "identifier"},
 										{"as", "participant"},
 									},
 								},
@@ -163,7 +163,7 @@ func GetParticipantsChannelsWithMessages(args GetParticipantChWithMsgArgs) ([]mo
 															},
 														},
 														bson.D{
-															{"$gte",
+															{"$gt",
 																bson.A{
 																	"$createdAt",
 																	"$$lastSeenMessageCreatedAt",

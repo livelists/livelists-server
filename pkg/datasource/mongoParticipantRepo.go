@@ -6,7 +6,6 @@ import (
 	"github.com/livelists/livelist-server/pkg/config"
 	"github.com/livelists/livelist-server/pkg/datasource/mongoSchemes"
 	"go.mongodb.org/mongo-driver/bson"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
 
@@ -149,13 +148,15 @@ func GetShortParticipants(args GetShortParticipantsArgs) ([]mongoSchemes.ShortPa
 }
 
 type UpdateLastMessageSeenAtArgs struct {
-	LastSeenAt        *timestamppb.Timestamp
+	LastSeenAtUnixMS  int64
 	Identifier        string
 	ChannelIdentifier string
 }
 
 func UpdateLastMessageSeenAt(args UpdateLastMessageSeenAtArgs) (time.Time, error) {
 	var client = config.GetMongoClient()
+
+	var createdAtTime = time.UnixMilli(args.LastSeenAtUnixMS)
 
 	filter := bson.D{{
 		"identifier", args.Identifier,
@@ -164,7 +165,7 @@ func UpdateLastMessageSeenAt(args UpdateLastMessageSeenAtArgs) (time.Time, error
 	}}
 
 	update := bson.D{{"$set", bson.D{{
-		"lastSeenMessageCreatedAt", args.LastSeenAt.AsTime(),
+		"lastSeenMessageCreatedAt", createdAtTime,
 	}}}}
 
 	var _, updateErr = client.Database(
@@ -174,8 +175,8 @@ func UpdateLastMessageSeenAt(args UpdateLastMessageSeenAtArgs) (time.Time, error
 		update)
 
 	if updateErr != nil {
-		return args.LastSeenAt.AsTime(), updateErr
+		return createdAtTime, updateErr
 	}
 
-	return args.LastSeenAt.AsTime(), nil
+	return createdAtTime, nil
 }

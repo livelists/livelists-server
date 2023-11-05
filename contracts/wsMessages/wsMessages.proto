@@ -125,7 +125,7 @@ message LoadChannelsWithMsgRes {
 
 message UpdateLastSeenMessageAtReq {
   string channelId = 1;
-  google.protobuf.Timestamp lastSeenAt = 2;
+  int64 lastSeenAtUnixMS = 2;
 }
 
 message UpdateLastSeenMessageAtRes {
