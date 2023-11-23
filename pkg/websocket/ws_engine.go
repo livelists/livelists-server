@@ -137,6 +137,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 		case ws.OpPong:
 			io.CopyN(ioutil.Discard, conn, header.Length)
+			fmt.Println("OpPong")
 			continue
 
 		case ws.OpClose:

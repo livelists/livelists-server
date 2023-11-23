@@ -22,8 +22,6 @@ type AddMessageArgs struct {
 func AddMessage(args AddMessageArgs) (mongoSchemes.Message, error) {
 	var client = config.GetMongoClient()
 
-	fmt.Println("sender identifier", args.SenderIdentifier)
-
 	newMessage := mongoSchemes.NewMessage(mongoSchemes.NewMessageArgs{
 		ChannelIdentifier: args.ChannelIdentifier,
 		SenderIdentifier:  args.SenderIdentifier,

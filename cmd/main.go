@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/livelists/livelist-server/cmd/client"
 	"github.com/livelists/livelist-server/pkg/config"
 	"github.com/livelists/livelist-server/pkg/config/boot"
@@ -44,7 +43,6 @@ func getConfigString(configFile string) (string, error) {
 
 func getConfig() (*config.Config, error) {
 	path, err := os.Getwd()
-	fmt.Print("path::", path, "endPath")
 	confString, err := getConfigString(path + "/pkg/config/config.yaml")
 	if err != nil {
 		return nil, err
