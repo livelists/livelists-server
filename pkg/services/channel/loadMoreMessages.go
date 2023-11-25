@@ -1,7 +1,6 @@
 package channel
 
 import (
-	"fmt"
 	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/services/message"
 	"github.com/livelists/livelist-server/pkg/shared"
@@ -24,8 +23,6 @@ func LoadMoreMessages(args *LoadMoreMessagesArgs) {
 		startFromDate = args.Payload.FirstLoadedCreatedAt.AsTime()
 	}
 
-	fmt.Println(startFromDate)
-
 	messagesResult, err := message.GetMessages(message.GetMessagesArgs{
 		StartFromDate:     startFromDate,
 		IsLoadOlder:       true,
@@ -33,8 +30,6 @@ func LoadMoreMessages(args *LoadMoreMessagesArgs) {
 		PageSize:          int(args.Payload.PageSize),
 		ChannelIdentifier: args.ChannelId,
 	})
-
-	fmt.Println(len(messagesResult.Messages))
 
 	response := wsMessages.InBoundMessage_LoadMoreMessagesRes{
 		LoadMoreMessagesRes: &wsMessages.LoadMoreMessagesRes{

@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type WsConnection struct {
@@ -74,7 +75,23 @@ func (WsC *WsConnection) AddConnection(conn *net.Conn) {
 		IsOnline:     true,
 		WS:           newWs,
 	})
+
 	WsC.Connection = conn
+
+	ticker := time.NewTicker(5 * time.Second)
+	quit := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				conn := *WsC.Connection
+				wsutil.WriteServerMessage(conn, ws.OpPing, ws.CompiledPing)
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
 }
 
 func (WsC *WsConnection) PublishToSID(payload []byte) error {
