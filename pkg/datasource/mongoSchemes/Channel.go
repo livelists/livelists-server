@@ -51,3 +51,9 @@ type shortChannel struct {
 	CreatedAt  time.Time          `bson:"createdAt"`
 	CustomData *map[string]string `bson:"customData"`
 }
+
+type ChannelParticipantsCount struct {
+	ParticipantsCount       int64   `bson:"participantsCount"`
+	OnlineParticipantsCount int64   `bson:"onlineParticipantsCount"`
+	Channel                 Channel `bson:"channel"`
+}

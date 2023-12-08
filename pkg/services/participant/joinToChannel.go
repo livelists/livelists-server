@@ -1,6 +1,7 @@
 package participant
 
 import (
+	"fmt"
 	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/datasource"
 	"github.com/livelists/livelist-server/pkg/services/message"
@@ -33,6 +34,8 @@ func JoinToChannel(args *JoinToChannelArgs) {
 		ChannelIdentifier: args.ChannelId,
 	})
 
+	fmt.Println("CreatedAt start", createdAtDate)
+
 	messagesResult, err := message.GetMessages(message.GetMessagesArgs{
 		PageSize:          int(args.Payload.InitialPageSize),
 		IsLoadOlder:       false,
@@ -44,6 +47,10 @@ func JoinToChannel(args *JoinToChannelArgs) {
 	notSeenCount, err := datasource.CountMessagesInChannelAfterDate(datasource.CountMessagesInChannelAfterDateArgs{
 		ChannelIdentifier: args.ChannelId,
 		Date:              meParticipant.LastSeenMessageCreatedAt,
+	})
+
+	channelInfo, err := datasource.CountParticipantsInChannel(datasource.CountParticipantsInChannelArgs{
+		ChannelIdentifier: args.ChannelId,
 	})
 
 	meJoinedMessage := wsMessages.InBoundMessage_MeJoinedToChannel{
@@ -66,6 +73,9 @@ func JoinToChannel(args *JoinToChannelArgs) {
 				LastMessageCreatedAt:     helpers.DateToTimeStamp(messagesResult.LastMessageCreatedAt),
 				TotalMessages:            messagesResult.TotalCount,
 				HistoryMessages:          messagesResult.Messages,
+				CustomData:               helpers.CustomDataFormat(channelInfo.Channel.CustomData),
+				ParticipantsCount:        channelInfo.ParticipantsCount,
+				ParticipantsOnlineCount:  channelInfo.OnlineParticipantsCount,
 			},
 		},
 	}
