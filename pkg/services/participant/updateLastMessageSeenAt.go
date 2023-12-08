@@ -36,7 +36,7 @@ func UpdateLastMessageSeenAt(args *UpdateLastMessageSeenAtArgs) {
 		Identifier:        args.RequesterIdentifier,
 		LastSeenAtUnixMS:  args.LastSeenAtUnixMS,
 	})
-	
+
 	args.WS.PublishMessage(shared.PublishMessageArgs{
 		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{
 			Identifier: args.RequesterIdentifier,

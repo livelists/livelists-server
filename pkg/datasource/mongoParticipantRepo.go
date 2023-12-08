@@ -37,6 +37,7 @@ func AddParticipant(args AddParticipantArgs) (mongoSchemes.Participant, error) {
 		Grants:     newParticipant.Grants,
 		CreatedAt:  newParticipant.CreatedAt,
 		Status:     newParticipant.Status,
+		CustomData: newParticipant.CustomData,
 	}, err
 }
 

@@ -7,6 +7,7 @@ import (
 	"github.com/livelists/livelist-server/pkg/config"
 	"github.com/livelists/livelist-server/pkg/datasource/mongoSchemes"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
 
@@ -235,4 +236,101 @@ func GetParticipantsChannelsWithMessages(args GetParticipantChWithMsgArgs) ([]mo
 	}
 
 	return channelsDocuments, nil
+}
+
+type CountParticipantsInChannelArgs struct {
+	ChannelIdentifier string
+}
+type CountParticipantsInChannelRes struct {
+	ParticipantsCount       int64
+	OnlineParticipantsCount int64
+	Channel                 mongoSchemes.Channel
+}
+
+func CountParticipantsInChannel(args CountParticipantsInChannelArgs) (CountParticipantsInChannelRes, error) {
+	var client = config.GetMongoClient()
+
+	channelsWithMsg, err := client.Database(
+		config.MainDatabase).Collection(mongoSchemes.ParticipantCollection).Aggregate(ctx, bson.A{
+		bson.D{{"$match", bson.D{{"channel", args.ChannelIdentifier}}}},
+		bson.D{
+			{"$addFields",
+				bson.D{
+					{"participantNum", 1},
+					{"onlineParticipantNum",
+						bson.D{
+							{"$cond",
+								bson.A{
+									bson.D{
+										{"$eq",
+											bson.A{
+												"$isOnline",
+												true,
+											},
+										},
+									},
+									1,
+									0,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		bson.D{
+			{"$group",
+				bson.D{
+					{"_id", primitive.Null{}},
+					{"channelIdentifier", bson.D{{"$first", "$channel"}}},
+					{"participantsCount", bson.D{{"$sum", "$participantNum"}}},
+					{"onlineParticipantsCount", bson.D{{"$sum", "$onlineParticipantNum"}}},
+				},
+			},
+		},
+		bson.D{
+			{"$lookup",
+				bson.D{
+					{"from", "Channel"},
+					{"localField", "channelIdentifier"},
+					{"foreignField", "identifier"},
+					{"as", "channel"},
+				},
+			},
+		},
+		bson.D{
+			{"$addFields",
+				bson.D{
+					{"channel",
+						bson.D{
+							{"$arrayElemAt",
+								bson.A{
+									"$channel",
+									0,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	})
+
+	var channelsDocuments []mongoSchemes.ChannelParticipantsCount
+
+	err = channelsWithMsg.All(ctx, &channelsDocuments)
+
+	if err != nil {
+		return CountParticipantsInChannelRes{}, err
+	}
+
+	if len(channelsDocuments) != 1 {
+		return CountParticipantsInChannelRes{}, nil
+	}
+
+	return CountParticipantsInChannelRes{
+		ParticipantsCount:       channelsDocuments[0].ParticipantsCount,
+		OnlineParticipantsCount: channelsDocuments[0].OnlineParticipantsCount,
+		Channel:                 channelsDocuments[0].Channel,
+	}, nil
 }

@@ -45,7 +45,7 @@ func (p ParticipantService) AddParticipantToChannel(ctx context.Context, req *pb
 				LocalId: "-",
 			},
 			ChannelId:        req.ChannelId,
-			SenderIdentifier: nil,
+			SenderIdentifier: &part.Identifier,
 			WS:               p.WS,
 			Type:             wsMessages.MessageType_System,
 			SubType:          wsMessages.MessageSubType_ParticipantJoined,

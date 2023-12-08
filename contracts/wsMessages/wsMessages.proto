@@ -56,6 +56,9 @@ message ChannelInitialInfo {
   int64 notSeenMessagesCount = 5;
   google.protobuf.Timestamp lastSeenMessageCreatedAt = 6;
   repeated Message historyMessages = 7;
+  optional CustomData customData = 8;
+  int64 participantsCount = 9;
+  int64 participantsOnlineCount = 10;
 }
 
 message MeJoined {
