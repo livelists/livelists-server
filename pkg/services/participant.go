@@ -40,6 +40,16 @@ func (p ParticipantService) AddParticipantToChannel(ctx context.Context, req *pb
 		}, nil
 	}
 
+	channel := datasource.FindChannelByIdentifier(datasource.FindChannelByIdentifierArgs{
+		Identifier: req.ChannelId,
+	})
+
+	if channel == nil {
+		return &pb.AddParticipantToChannelRes{
+			Errors: []pb.AddParticipantToChannelErrors{pb.AddParticipantToChannelErrors_ChannelNotFound},
+		}, nil
+	}
+
 	part, err := datasource.AddParticipant(datasource.AddParticipantArgs{
 		Identifier: req.Identifier,
 		Channel:    req.ChannelId,

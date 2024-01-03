@@ -13,6 +13,7 @@ enum AddParticipantToChannelErrors {
   Unauthorized = 0;
   IsAlreadyExist = 1;
   IdentifierNotValid = 2;
+  ChannelNotFound = 3;
 }
 
 enum GetParticipantAccessTokenErrors {

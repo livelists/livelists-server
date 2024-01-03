@@ -1919,6 +1919,7 @@ func file_wsMessages_proto_init() {
 	if File_wsMessages_proto != nil {
 		return
 	}
+
 	if !protoimpl.UnsafeEnabled {
 		file_wsMessages_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*OutBoundMessage); i {
