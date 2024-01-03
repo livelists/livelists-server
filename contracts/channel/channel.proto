@@ -9,8 +9,13 @@ enum ChannelStatus {
   Archived = 1;
 }
 
+enum CreateChannelErrors {
+  Unauthorized = 0;
+  IsAlreadyExist = 1;
+}
+
 service ChannelService {
-  rpc CreateChannel(CreateChannelReq) returns (Channel);
+  rpc CreateChannel(CreateChannelReq) returns (CreateChannelResponse);
 }
 
 message Channel {
@@ -18,9 +23,20 @@ message Channel {
   google.protobuf.Timestamp createdAt = 2;
   int64 maxParticipants = 3;
   ChannelStatus status = 4;
+  optional CustomData customData = 5;
+}
+
+message CreateChannelResponse {
+  repeated CreateChannelErrors errors = 1;
+  optional Channel channel = 2;
 }
 
 message CreateChannelReq {
   string identifier = 1;
-  int64 maxParticipants = 3;
+  int64 maxParticipants = 2;
+  optional CustomData customData = 3;
+}
+
+message CustomData {
+  map<string, string> data = 1;
 }

@@ -1,7 +1,6 @@
 package participant
 
 import (
-	"fmt"
 	"github.com/livelists/livelist-server/contracts/wsMessages"
 	"github.com/livelists/livelist-server/pkg/datasource"
 	"github.com/livelists/livelist-server/pkg/services/message"
@@ -17,10 +16,31 @@ type JoinToChannelArgs struct {
 }
 
 func JoinToChannel(args *JoinToChannelArgs) {
-	var meParticipant, err = datasource.FindParticipantByIdentifierAndChannel(datasource.FindPByIdAndChannelArgs{
+	var errorResponse = wsMessages.InBoundMessage_MeJoinedToChannel{
+		MeJoinedToChannel: &wsMessages.MeJoinedToChannel{
+			Me:                 &wsMessages.MeJoined{},
+			IsSuccess:          false,
+			IsParticipantFound: true,
+			Channel: &wsMessages.ChannelInitialInfo{
+				ChannelId:             args.ChannelId,
+				TotalMessages:         0,
+				FirstMessageCreatedAt: nil,
+				LastMessageCreatedAt:  nil,
+				HistoryMessages:       []*wsMessages.Message{},
+			},
+		},
+	}
+
+	var meParticipant = datasource.FindParticipantByIdentifierAndChannel(datasource.FindPByIdAndChannelArgs{
 		ChannelId:  args.ChannelId,
 		Identifier: args.WsIdentifier,
 	})
+
+	if meParticipant == nil {
+		errorResponse.MeJoinedToChannel.IsParticipantFound = false
+		sendResponse(args.WS, &errorResponse, args.WsIdentifier)
+		return
+	}
 
 	JoinToChannelRoom(&JoinToChannelRoomArgs{
 		WsIdentifier: args.WsIdentifier,
@@ -33,8 +53,6 @@ func JoinToChannel(args *JoinToChannelArgs) {
 		StartDate:         meParticipant.LastSeenMessageCreatedAt,
 		ChannelIdentifier: args.ChannelId,
 	})
-
-	fmt.Println("CreatedAt start", createdAtDate)
 
 	messagesResult, err := message.GetMessages(message.GetMessagesArgs{
 		PageSize:          int(args.Payload.InitialPageSize),
@@ -64,7 +82,8 @@ func JoinToChannel(args *JoinToChannelArgs) {
 				},
 				CustomData: helpers.CustomDataFormat(meParticipant.CustomData),
 			},
-			IsSuccess: true,
+			IsSuccess:          true,
+			IsParticipantFound: true,
 			Channel: &wsMessages.ChannelInitialInfo{
 				ChannelId:                args.ChannelId,
 				NotSeenMessagesCount:     notSeenCount,
@@ -81,26 +100,18 @@ func JoinToChannel(args *JoinToChannelArgs) {
 	}
 
 	if err != nil {
-		meJoinedMessage = wsMessages.InBoundMessage_MeJoinedToChannel{
-			MeJoinedToChannel: &wsMessages.MeJoinedToChannel{
-				Me:        &wsMessages.MeJoined{},
-				IsSuccess: false,
-				Channel: &wsMessages.ChannelInitialInfo{
-					ChannelId:             args.ChannelId,
-					TotalMessages:         0,
-					FirstMessageCreatedAt: nil,
-					LastMessageCreatedAt:  nil,
-					HistoryMessages:       []*wsMessages.Message{},
-				},
-			},
-		}
+		meJoinedMessage = errorResponse
 	}
 
-	args.WS.PublishMessage(shared.PublishMessageArgs{
-		RoomName: args.WS.GetRoomName(shared.GetRoomNameArgs{
-			Identifier: args.WsIdentifier,
+	sendResponse(args.WS, &meJoinedMessage, args.WsIdentifier)
+}
+
+func sendResponse(ws shared.WsRoom, message *wsMessages.InBoundMessage_MeJoinedToChannel, wsIdentifier string) {
+	ws.PublishMessage(shared.PublishMessageArgs{
+		RoomName: ws.GetRoomName(shared.GetRoomNameArgs{
+			Identifier: wsIdentifier,
 			Type:       wsMessages.WSRoomTypes_Participant,
 		}),
-		Data: wsMessages.InBoundMessage{Message: &meJoinedMessage},
+		Data: wsMessages.InBoundMessage{Message: message},
 	})
 }

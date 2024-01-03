@@ -16,12 +16,12 @@ type UpdateLastMessageSeenAtArgs struct {
 }
 
 func UpdateLastMessageSeenAt(args *UpdateLastMessageSeenAtArgs) {
-	var meParticipant, err = datasource.FindParticipantByIdentifierAndChannel(datasource.FindPByIdAndChannelArgs{
+	var meParticipant = datasource.FindParticipantByIdentifierAndChannel(datasource.FindPByIdAndChannelArgs{
 		ChannelId:  args.ChannelId,
 		Identifier: args.RequesterIdentifier,
 	})
 
-	if err != nil {
+	if meParticipant == nil {
 		return
 	}
 

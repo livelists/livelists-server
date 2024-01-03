@@ -46,7 +46,7 @@ type FindPByIdAndChannelArgs struct {
 	ChannelId  string
 }
 
-func FindParticipantByIdentifierAndChannel(args FindPByIdAndChannelArgs) (mongoSchemes.Participant, error) {
+func FindParticipantByIdentifierAndChannel(args FindPByIdAndChannelArgs) *mongoSchemes.Participant {
 	var client = config.GetMongoClient()
 
 	participant := client.Database(
@@ -60,7 +60,10 @@ func FindParticipantByIdentifierAndChannel(args FindPByIdAndChannelArgs) (mongoS
 	var participantDocument mongoSchemes.Participant
 	err := participant.Decode(&participantDocument)
 
-	return participantDocument, err
+	if err != nil {
+		return nil
+	}
+	return &participantDocument
 }
 
 type FindAllParticipantsByIdArgs struct {

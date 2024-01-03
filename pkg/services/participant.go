@@ -17,6 +17,29 @@ type ParticipantService struct {
 }
 
 func (p ParticipantService) AddParticipantToChannel(ctx context.Context, req *pb.AddParticipantToChannelReq) (*pb.AddParticipantToChannelRes, error) {
+	if ctx.Value("isTokenValid").(bool) == false {
+		return &pb.AddParticipantToChannelRes{
+			Errors: []pb.AddParticipantToChannelErrors{pb.AddParticipantToChannelErrors_Unauthorized},
+		}, nil
+	}
+
+	existedParticipant := datasource.FindParticipantByIdentifierAndChannel(datasource.FindPByIdAndChannelArgs{
+		Identifier: req.Identifier,
+		ChannelId:  req.ChannelId,
+	})
+
+	if existedParticipant != nil {
+		return &pb.AddParticipantToChannelRes{
+			Errors: []pb.AddParticipantToChannelErrors{pb.AddParticipantToChannelErrors_IsAlreadyExist},
+		}, nil
+	}
+
+	if len(req.Identifier) == 0 {
+		return &pb.AddParticipantToChannelRes{
+			Errors: []pb.AddParticipantToChannelErrors{pb.AddParticipantToChannelErrors_IdentifierNotValid},
+		}, nil
+	}
+
 	part, err := datasource.AddParticipant(datasource.AddParticipantArgs{
 		Identifier: req.Identifier,
 		Channel:    req.ChannelId,
@@ -69,10 +92,22 @@ func (p ParticipantService) AddParticipantToChannel(ctx context.Context, req *pb
 }
 
 func (p ParticipantService) GetParticipantAccessToken(ctx context.Context, req *pb.GetParticipantAccessTokenReq) (*pb.GetParticipantAccessTokenRes, error) {
-	part, err := datasource.FindParticipantByIdentifierAndChannel(datasource.FindPByIdAndChannelArgs{
+	if ctx.Value("isTokenValid").(bool) == false {
+		return &pb.GetParticipantAccessTokenRes{
+			Errors: []pb.GetParticipantAccessTokenErrors{pb.GetParticipantAccessTokenErrors_RootUnauthorized},
+		}, nil
+	}
+
+	part := datasource.FindParticipantByIdentifierAndChannel(datasource.FindPByIdAndChannelArgs{
 		Identifier: req.Identifier,
 		ChannelId:  req.ChannelId,
 	})
+
+	if part == nil {
+		return &pb.GetParticipantAccessTokenRes{
+			Errors: []pb.GetParticipantAccessTokenErrors{pb.GetParticipantAccessTokenErrors_NotFound},
+		}, nil
+	}
 
 	token := accessToken.AccessToken{}
 

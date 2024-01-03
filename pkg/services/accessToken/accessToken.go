@@ -43,15 +43,38 @@ func (at *AccessToken) Parse(tokenStr string) (bool, error) {
 	})
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		sendMessage := claims["SendMessage"].(bool)
-		admin := claims["Admin"].(bool)
-		readMessages := claims["ReadMessages"].(bool)
+		sendMessage := false
+		admin := false
+		readMessages := false
+		identifier := ""
+
+		if claims["SendMessage"] != nil {
+			sendMessage = claims["SendMessage"].(bool)
+		}
+
+		if claims["Admin"] != nil {
+			admin = claims["Admin"].(bool)
+		}
+
+		if claims["ReadMessages"] != nil {
+			readMessages = claims["ReadMessages"].(bool)
+		}
+
+		if claims["Identifier"] != nil {
+			identifier = claims["Identifier"].(string)
+		}
+
+		if claims["isServiceRoot"] != nil {
+			isRoot := claims["isServiceRoot"].(bool)
+			at.isServiceRoot = &isRoot
+		}
 		at.AddGrants(GrantsData{
 			SendMessage:  &sendMessage,
 			Admin:        &admin,
 			ReadMessages: &readMessages,
 		})
-		at.AddUser(claims["Identifier"].(string))
+
+		at.AddUser(identifier)
 		at.isValid = &token.Valid
 	} else {
 		return false, err

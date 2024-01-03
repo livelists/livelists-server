@@ -52,7 +52,7 @@ func CreateMessage(args *CreateMessageArgs) (*mongoSchemes.Message, error) {
 	}
 
 	if args.SenderIdentifier != nil {
-		participant, _ := datasource.FindParticipantByIdentifierAndChannel(datasource.FindPByIdAndChannelArgs{
+		participant := datasource.FindParticipantByIdentifierAndChannel(datasource.FindPByIdAndChannelArgs{
 			Identifier: *args.SenderIdentifier,
 			ChannelId:  args.ChannelId,
 		})
