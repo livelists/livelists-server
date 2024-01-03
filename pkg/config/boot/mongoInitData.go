@@ -3,7 +3,6 @@ package boot
 import (
 	"context"
 	confPackage "github.com/livelists/livelist-server/pkg/config"
-	"github.com/livelists/livelist-server/pkg/datasource"
 	"github.com/livelists/livelist-server/pkg/datasource/mongoSchemes"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,6 +11,12 @@ import (
 
 func SeedMongo(client *mongo.Client, config *confPackage.Config) {
 	db := client.Database(confPackage.MainDatabase)
+
+	participantIndexModel := mongo.IndexModel{
+		Keys:    bson.D{{"identifier", -1}, {"channel", -1}},
+		Options: options.Index().SetUnique(true),
+	}
+	db.Collection(mongoSchemes.ParticipantCollection).Indexes().CreateOne(context.TODO(), participantIndexModel)
 
 	channelIndexModel := mongo.IndexModel{
 		Keys:    bson.D{{"identifier", -1}},
@@ -33,9 +38,4 @@ func SeedMongo(client *mongo.Client, config *confPackage.Config) {
 		Keys: bson.D{{"createdAt", -1}},
 	}
 	db.Collection(mongoSchemes.MessageCollection).Indexes().CreateOne(context.TODO(), messageCreatedAtIndexModel)
-
-	datasource.AddAuthInfo(client, datasource.AddAuthInfoArgs{
-		ApiKey:    config.ApiKey,
-		SecretKey: config.SecretKey,
-	})
 }

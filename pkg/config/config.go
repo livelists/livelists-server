@@ -13,11 +13,11 @@ type ConfStore struct {
 var confStore ConfStore
 
 type Config struct {
-	Port      uint        `yaml:"port"`
-	ApiKey    string      `yaml:"api_key"`
-	SecretKey string      `yaml:"secret_key"`
-	Redis     RedisConfig `yaml:"redis,omitempty"`
-	Mongo     MongoConfig `yaml:"mongo,omitempty"`
+	ClientPort uint        `yaml:"clientPort"`
+	AdminPort  uint        `yaml:"adminPort"`
+	ApiKey     string      `yaml:"api_key"`
+	SecretKey  string      `yaml:"secret_key"`
+	Mongo      MongoConfig `yaml:"mongo,omitempty"`
 }
 
 type RedisConfig struct {
@@ -33,8 +33,8 @@ type MongoConfig struct {
 
 func NewConfig(configStr string) (*Config, error) {
 	configData := &Config{
-		Port:  7771,
-		Redis: RedisConfig{},
+		AdminPort:  7772,
+		ClientPort: 7771,
 	}
 
 	if configStr != "" {

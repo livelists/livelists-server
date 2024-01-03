@@ -27,9 +27,9 @@ func StartServer(conf *config.Config) {
 	}
 	boot.SeedMongo(mongoClient, conf)
 
-	go client.StartTwirpRPC()
+	go client.StartTwirpRPC(conf.AdminPort)
 
-	websocket.StartWS(conf.Port)
+	websocket.StartWS(conf.ClientPort)
 }
 
 func getConfigString(configFile string) (string, error) {

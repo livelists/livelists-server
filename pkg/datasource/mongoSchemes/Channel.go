@@ -23,15 +23,22 @@ type NewChannelArgs struct {
 	Identifier      string
 	MaxParticipants int64
 	Status          pb.ChannelStatus
+	CustomData      *pb.CustomData
 }
 
 func NewChannel(args NewChannelArgs) Channel {
+	var customData map[string]string
+
+	if args.CustomData != nil {
+		customData = args.CustomData.Data
+	}
+
 	return Channel{
 		ID:                       primitive.NewObjectID(),
 		Identifier:               args.Identifier,
 		MaxParticipants:          args.MaxParticipants,
 		Status:                   args.Status.String(),
-		CustomData:               nil,
+		CustomData:               &customData,
 		LastSeenMessageCreatedAt: time.Now(),
 		CreatedAt:                time.Now(),
 		UpdatedAt:                time.Now(),

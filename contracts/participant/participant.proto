@@ -9,15 +9,28 @@ enum ParticipantStatus {
   Banned = 1;
 }
 
+enum AddParticipantToChannelErrors {
+  Unauthorized = 0;
+  IsAlreadyExist = 1;
+  IdentifierNotValid = 2;
+  ChannelNotFound = 3;
+}
+
+enum GetParticipantAccessTokenErrors {
+  RootUnauthorized = 0;
+  NotFound = 1;
+}
+
 service ParticipantService {
   rpc AddParticipantToChannel(AddParticipantToChannelReq) returns (AddParticipantToChannelRes);
   rpc GetParticipantAccessToken(GetParticipantAccessTokenReq) returns (GetParticipantAccessTokenRes);
 }
 
 message AddParticipantToChannelRes {
-  Participant participant = 1;
-  string accessToken = 2;
-  ChannelParticipantGrants grants = 3;
+  repeated AddParticipantToChannelErrors errors = 1;
+  Participant participant = 2;
+  string accessToken = 3;
+  ChannelParticipantGrants grants = 4;
 }
 
 message ChannelParticipantGrants {
@@ -47,9 +60,10 @@ message GetParticipantAccessTokenReq {
 }
 
 message GetParticipantAccessTokenRes {
-  string identifier = 1;
-  string channelId = 2;
-  string accessToken = 3;
+  repeated GetParticipantAccessTokenErrors errors = 1;
+  string identifier = 2;
+  string channelId = 3;
+  string accessToken = 4;
 }
 
 message CustomData {

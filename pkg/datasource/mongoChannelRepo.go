@@ -1,19 +1,18 @@
 package datasource
 
 import (
-	"fmt"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	pb "github.com/livelists/livelist-server/contracts/channel"
 	"github.com/livelists/livelist-server/pkg/config"
 	"github.com/livelists/livelist-server/pkg/datasource/mongoSchemes"
+	"github.com/livelists/livelist-server/pkg/shared/helpers"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"time"
 )
 
 type CreateChannelArgs struct {
 	Identifier      string
 	MaxParticipants int64
+	CustomData      *pb.CustomData
 }
 
 func CreateChannel(args CreateChannelArgs) pb.Channel {
@@ -23,17 +22,16 @@ func CreateChannel(args CreateChannelArgs) pb.Channel {
 		Identifier:      args.Identifier,
 		Status:          pb.ChannelStatus_Active,
 		MaxParticipants: args.MaxParticipants,
+		CustomData:      args.CustomData,
 	})
 
-	_, err := client.Database(config.MainDatabase).Collection(mongoSchemes.ChannelCollection).InsertOne(ctx, newChannel)
-
-	fmt.Print("channel create", err)
+	client.Database(config.MainDatabase).Collection(mongoSchemes.ChannelCollection).InsertOne(ctx, newChannel)
 
 	return pb.Channel{
 		Identifier:      args.Identifier,
 		Status:          pb.ChannelStatus_Active,
 		MaxParticipants: args.MaxParticipants,
-		CreatedAt:       &timestamp.Timestamp{Seconds: int64(time.Now().Second())},
+		CreatedAt:       helpers.DateToTimeStamp(newChannel.CreatedAt),
 	}
 }
 
@@ -333,4 +331,27 @@ func CountParticipantsInChannel(args CountParticipantsInChannelArgs) (CountParti
 		OnlineParticipantsCount: channelsDocuments[0].OnlineParticipantsCount,
 		Channel:                 channelsDocuments[0].Channel,
 	}, nil
+}
+
+type FindChannelByIdentifierArgs struct {
+	Identifier string
+}
+
+func FindChannelByIdentifier(args FindChannelByIdentifierArgs) *mongoSchemes.Channel {
+	var client = config.GetMongoClient()
+
+	channel := client.Database(
+		config.MainDatabase).Collection(mongoSchemes.ChannelCollection).FindOne(ctx, bson.D{
+		{
+			"identifier", args.Identifier,
+		}})
+
+	var channelDocument mongoSchemes.Channel
+	err := channel.Decode(&channelDocument)
+
+	if err != nil {
+		return nil
+	}
+
+	return &channelDocument
 }

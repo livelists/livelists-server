@@ -70,7 +70,8 @@ message MeJoined {
 message MeJoinedToChannel {
   MeJoined me = 1;
   bool isSuccess = 2;
-  ChannelInitialInfo channel = 3;
+  bool isParticipantFound = 3;
+  ChannelInitialInfo channel = 4;
 }
 
 message LoadMoreMessages {
