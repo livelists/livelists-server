@@ -60,9 +60,13 @@ func GetMessagesFromChannel(args GetMessagesFromChannelArgs) (GetMessagesFromCha
 	var client = config.GetMongoClient()
 
 	var dateFilter = "$gte"
+	var initialSort = 1
+	var revertSort = -1
 
 	if args.IsLoadOlder {
 		dateFilter = "$lt"
+		initialSort = -1
+		revertSort = 1
 	}
 
 	messages, err := client.Database(
@@ -76,11 +80,11 @@ func GetMessagesFromChannel(args GetMessagesFromChannelArgs) (GetMessagesFromCha
 			},
 		},
 		bson.D{{"$sort", bson.D{
-			{"createdAt", -1},
+			{"createdAt", initialSort},
 		}}},
 		bson.D{{"$skip", args.Skip}},
 		bson.D{{"$limit", args.Limit}},
-		bson.D{{"$sort", bson.D{{"createdAt", 1}}}},
+		bson.D{{"$sort", bson.D{{"createdAt", revertSort}}}},
 		bson.D{
 			{"$lookup",
 				bson.D{
@@ -347,9 +351,9 @@ func GetMessageCreatedAtByOffset(args GetMessageCreatedAtByOffsetArgs) (time.Tim
 				},
 			},
 		},
-		bson.D{{"$sort", bson.D{{"createdAt", 1}}}},
-		bson.D{{"$limit", args.Offset}},
 		bson.D{{"$sort", bson.D{{"createdAt", -1}}}},
+		bson.D{{"$limit", args.Offset}},
+		bson.D{{"$sort", bson.D{{"createdAt", 1}}}},
 		bson.D{{"$limit", 1}},
 	})
 
