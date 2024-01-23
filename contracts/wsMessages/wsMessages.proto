@@ -78,7 +78,7 @@ message LoadMoreMessages {
   string channelId = 1;
   int32 pageSize = 2;
   optional google.protobuf.Timestamp firstLoadedCreatedAt = 3;
-  bool isLoadOlder = 4;
+  bool isLoadPrev = 4;
   int32 skipFromFirstLoaded = 5;
 }
 
@@ -86,6 +86,7 @@ message LoadMoreMessagesRequestInfo {
   int32 pageSize = 1;
   optional google.protobuf.Timestamp firstLoadedCreatedAt = 2;
   int32 skipFromFirstLoaded = 3;
+  bool isLoadPrev = 4;
 }
 
 message LoadMoreMessagesRes {

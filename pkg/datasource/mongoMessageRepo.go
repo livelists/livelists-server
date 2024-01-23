@@ -59,7 +59,7 @@ type GetMessagesFromChannelRes struct {
 func GetMessagesFromChannel(args GetMessagesFromChannelArgs) (GetMessagesFromChannelRes, error) {
 	var client = config.GetMongoClient()
 
-	var dateFilter = "$gte"
+	var dateFilter = "$gt"
 	var initialSort = 1
 	var revertSort = -1
 

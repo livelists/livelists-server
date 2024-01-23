@@ -12,7 +12,6 @@ type LoadMoreMessagesArgs struct {
 	Payload             wsMessages.LoadMoreMessages
 	ChannelId           string
 	RequesterIdentifier string
-	IsLoadOlder         bool
 	WS                  shared.WsRoom
 }
 
@@ -25,7 +24,7 @@ func LoadMoreMessages(args *LoadMoreMessagesArgs) {
 
 	messagesResult, err := message.GetMessages(message.GetMessagesArgs{
 		StartFromDate:     startFromDate,
-		IsLoadOlder:       true,
+		IsLoadOlder:       args.Payload.IsLoadPrev,
 		Offset:            int(args.Payload.SkipFromFirstLoaded),
 		PageSize:          int(args.Payload.PageSize),
 		ChannelIdentifier: args.ChannelId,
@@ -37,6 +36,7 @@ func LoadMoreMessages(args *LoadMoreMessagesArgs) {
 				PageSize:             args.Payload.PageSize,
 				FirstLoadedCreatedAt: args.Payload.FirstLoadedCreatedAt,
 				SkipFromFirstLoaded:  args.Payload.SkipFromFirstLoaded,
+				IsLoadPrev:           args.Payload.IsLoadPrev,
 			},
 			IsSuccess:             true,
 			FirstMessageCreatedAt: helpers.DateToTimeStamp(messagesResult.FirstMessageCreatedAt),
@@ -53,6 +53,7 @@ func LoadMoreMessages(args *LoadMoreMessagesArgs) {
 					PageSize:             args.Payload.PageSize,
 					FirstLoadedCreatedAt: args.Payload.FirstLoadedCreatedAt,
 					SkipFromFirstLoaded:  args.Payload.SkipFromFirstLoaded,
+					IsLoadPrev:           args.Payload.IsLoadPrev,
 				},
 				IsSuccess:             false,
 				TotalMessages:         0,
