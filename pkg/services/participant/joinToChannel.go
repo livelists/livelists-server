@@ -49,7 +49,7 @@ func JoinToChannel(args *JoinToChannelArgs) {
 	})
 
 	createdAtDate, err := datasource.GetMessageCreatedAtByOffset(datasource.GetMessageCreatedAtByOffsetArgs{
-		Offset:            10,
+		Offset:            40,
 		StartDate:         meParticipant.LastSeenMessageCreatedAt,
 		ChannelIdentifier: args.ChannelId,
 	})
